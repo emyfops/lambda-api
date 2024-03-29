@@ -8,8 +8,16 @@ import (
 )
 
 type DiscordUser struct {
-	ID         int    `json:"id"`
-	Username   string `json:"username"`
+	// The user's ID.
+	// example: 1234567890
+	ID int `json:"id"`
+
+	// The user's username.
+	// example: John Doe
+	Username string `json:"username"`
+
+	// The user's name.
+	// example: john.doe
 	GlobalName string `json:"global_name"`
 }
 

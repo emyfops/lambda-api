@@ -6,10 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @title Lambda RPC API
-// @version 1.0
-// @description This is the API for the Lambda Discord RPC handler
-// @contact.url https://discord.gg/J23U4YEaAr
+// @Title Lambda RPC API
+// @Version 1.0
+// @Description This is the API for the Lambda Discord RPC handler
+// @Contact.Name Lambda Discord
+// @Contact.Url https://discord.gg/J23U4YEaAr
 //
 // @license.name GNU General Public License v3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html

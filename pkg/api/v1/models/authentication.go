@@ -1,18 +1,20 @@
 package models
 
-import "time"
-
 // Authentication represents the response from the authentication endpoint.
 type Authentication struct {
 	// The access token to use for the API
+	// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 	AccessToken string `json:"access_token"`
 
 	// The duration of the token (in seconds).
-	ExpiresIn time.Duration `json:"expires_in"`
+	// example: 3600
+	ExpiresIn int64 `json:"expires_in"`
 
 	// The type of the token.
+	// example: Bearer
 	TokenType string `json:"token_type"`
 
 	// The message to display to the user.
+	// example: Successfully logged in.
 	Message string `json:"message"`
 }

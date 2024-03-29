@@ -8,7 +8,12 @@ import (
 )
 
 type MinecraftPlayer struct {
+	// The player's name.
+	// example: Notch
 	Name string `json:"name"`
+
+	// The player's UUID.
+	// example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
 	UUID string `json:"id"`
 }
 

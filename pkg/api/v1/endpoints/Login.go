@@ -42,7 +42,7 @@ func Login(ctx *gin.Context) {
 
 	ctx.AbortWithStatusJSON(http.StatusOK, models.Authentication{
 		AccessToken: signed,
-		ExpiresIn:   time.Hour * 24,
+		ExpiresIn:   int64(time.Hour * 24),
 		TokenType:   "Bearer",
 		Message:     "Successfully logged in.",
 	})

@@ -10,6 +10,7 @@ const docTemplatev1 = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
+            "name": "Lambda Discord",
             "url": "https://discord.gg/J23U4YEaAr"
         },
         "license": {
@@ -129,23 +130,19 @@ const docTemplatev1 = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "description": "The access token to use for the API",
+                    "description": "The access token to use for the API\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
                     "type": "string"
                 },
                 "expires_in": {
-                    "description": "The duration of the token (in seconds).",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/time.Duration"
-                        }
-                    ]
+                    "description": "The duration of the token (in seconds).\nexample: 3600",
+                    "type": "integer"
                 },
                 "message": {
-                    "description": "The message to display to the user.",
+                    "description": "The message to display to the user.\nexample: Successfully logged in.",
                     "type": "string"
                 },
                 "token_type": {
-                    "description": "The type of the token.",
+                    "description": "The type of the token.\nexample: Bearer",
                     "type": "string"
                 }
             }
@@ -154,12 +151,15 @@ const docTemplatev1 = `{
             "type": "object",
             "properties": {
                 "global_name": {
+                    "description": "The user's name.\nexample: john.doe",
                     "type": "string"
                 },
                 "id": {
+                    "description": "The user's ID.\nexample: 1234567890",
                     "type": "integer"
                 },
                 "username": {
+                    "description": "The user's username.\nexample: John Doe",
                     "type": "string"
                 }
             }
@@ -168,9 +168,11 @@ const docTemplatev1 = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "description": "The player's UUID.\nexample: 069a79f4-44e9-4726-a5be-fca90e38aaf5",
                     "type": "string"
                 },
                 "name": {
+                    "description": "The player's name.\nexample: Notch",
                     "type": "string"
                 }
             }
@@ -179,12 +181,15 @@ const docTemplatev1 = `{
             "type": "object",
             "properties": {
                 "creation": {
+                    "description": "The creation date of the party.\nexample: 2021-10-10T12:00:00Z",
                     "type": "string"
                 },
                 "id": {
+                    "description": "The ID of the party.\nIt is a random string of 69 characters.",
                     "type": "string"
                 },
                 "players": {
+                    "description": "The list of players in the party.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Player"
@@ -196,51 +201,22 @@ const docTemplatev1 = `{
             "type": "object",
             "properties": {
                 "discord": {
-                    "$ref": "#/definitions/models.DiscordUser"
+                    "description": "The Discord user.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.DiscordUser"
+                        }
+                    ]
                 },
                 "player": {
-                    "$ref": "#/definitions/models.MinecraftPlayer"
+                    "description": "The Minecraft player.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.MinecraftPlayer"
+                        }
+                    ]
                 }
             }
-        },
-        "time.Duration": {
-            "type": "integer",
-            "enum": [
-                -9223372036854775808,
-                9223372036854775807,
-                1,
-                1000,
-                1000000,
-                1000000000,
-                60000000000,
-                3600000000000,
-                -9223372036854775808,
-                9223372036854775807,
-                1,
-                1000,
-                1000000,
-                1000000000,
-                60000000000,
-                3600000000000
-            ],
-            "x-enum-varnames": [
-                "minDuration",
-                "maxDuration",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond",
-                "Second",
-                "Minute",
-                "Hour",
-                "minDuration",
-                "maxDuration",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond",
-                "Second",
-                "Minute",
-                "Hour"
-            ]
         }
     },
     "securityDefinitions": {

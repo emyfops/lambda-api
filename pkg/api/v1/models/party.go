@@ -9,9 +9,16 @@ import (
 // It contains an ID, a creation date and a list of players.
 // There is no leader in the party, all players have the same rights.
 type Party struct {
-	ID       string    `json:"id"`
+	// The ID of the party.
+	// It is a random string of 69 characters.
+	ID string `json:"id"`
+
+	// The creation date of the party.
+	// example: 2021-10-10T12:00:00Z
 	Creation time.Time `json:"creation"`
-	Players  []Player  `json:"players"`
+
+	// The list of players in the party.
+	Players []Player `json:"players"`
 }
 
 // New creates a new party with the given name and players.

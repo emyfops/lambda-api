@@ -1,8 +1,11 @@
 package models
 
 type Player struct {
+	// The Minecraft player.
 	Minecraft MinecraftPlayer `json:"player"`
-	Discord   DiscordUser     `json:"discord"`
+
+	// The Discord user.
+	Discord DiscordUser `json:"discord"`
 }
 
 func GetPlayer(name, hash, token string) *Player {
