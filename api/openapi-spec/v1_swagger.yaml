@@ -1,0 +1,173 @@
+basePath: /api/v1
+definitions:
+  models.Authentication:
+    properties:
+      access_token:
+        description: |-
+          The access token to use for the API
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        type: string
+      expires_in:
+        description: |-
+          The duration of the token (in seconds).
+          example: 3600
+        type: integer
+      message:
+        description: |-
+          The message to display to the user.
+          example: Successfully logged in.
+        type: string
+      token_type:
+        description: |-
+          The type of the token.
+          example: Bearer
+        type: string
+    type: object
+  models.DiscordUser:
+    properties:
+      global_name:
+        description: |-
+          The user's name.
+          example: john.doe
+        type: string
+      id:
+        description: |-
+          The user's ID.
+          example: 1234567890
+        type: integer
+      username:
+        description: |-
+          The user's username.
+          example: John Doe
+        type: string
+    type: object
+  models.MinecraftPlayer:
+    properties:
+      id:
+        description: |-
+          The player's UUID.
+          example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
+        type: string
+      name:
+        description: |-
+          The player's name.
+          example: Notch
+        type: string
+    type: object
+  models.Party:
+    properties:
+      creation:
+        description: |-
+          The creation date of the party.
+          example: 2021-10-10T12:00:00Z
+        type: string
+      id:
+        description: |-
+          The ID of the party.
+          It is a random string of 69 characters.
+        type: string
+      players:
+        description: The list of players in the party.
+        items:
+          $ref: '#/definitions/models.Player'
+        type: array
+    type: object
+  models.Player:
+    properties:
+      discord:
+        allOf:
+        - $ref: '#/definitions/models.DiscordUser'
+        description: The Discord user.
+      player:
+        allOf:
+        - $ref: '#/definitions/models.MinecraftPlayer'
+        description: The Minecraft player.
+    type: object
+info:
+  contact:
+    name: Lambda Discord
+    url: https://discord.gg/J23U4YEaAr
+  description: This is the API for the Lambda Discord RPC handler
+  license:
+    name: GNU General Public License v3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+  title: Lambda RPC API
+  version: "1.0"
+paths:
+  /party/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new party
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Party'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Party'
+      security:
+      - Bearer: []
+      summary: Create a new party
+      tags:
+      - Party
+  /party/join:
+    post:
+      consumes:
+      - application/json
+      description: Join a party
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Party'
+      security:
+      - Bearer: []
+      summary: Join a party
+      tags:
+      - Party
+  /party/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to the server using a Discord identify token, a Minecraft
+        username and a Mojang session hash
+      parameters:
+      - description: Discord identify token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Minecraft username
+        in: header
+        name: username
+        required: true
+        type: string
+      - description: Mojang session hash
+        in: header
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Authentication'
+      summary: Login to the server
+      tags:
+      - Party
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
