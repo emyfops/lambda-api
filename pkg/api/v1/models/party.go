@@ -25,7 +25,7 @@ type Party struct {
 // The UUID is generated automatically.
 func New(players ...Player) *Party {
 	return &Party{
-		ID:       util.RandStringBytesMaskSrcUnsafe(69),
+		ID:       util.RandString(69),
 		Creation: time.Now(),
 		Players:  players,
 	}
