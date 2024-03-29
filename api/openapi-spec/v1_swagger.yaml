@@ -1,0 +1,171 @@
+basePath: /api/v1
+definitions:
+  models.Authentication:
+    properties:
+      access_token:
+        description: The access token to use for the API
+        type: string
+      expires_in:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: The duration of the token (in seconds).
+      message:
+        description: The message to display to the user.
+        type: string
+      token_type:
+        description: The type of the token.
+        type: string
+    type: object
+  models.DiscordUser:
+    properties:
+      global_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  models.MinecraftPlayer:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Party:
+    properties:
+      creation:
+        type: string
+      id:
+        type: string
+      players:
+        items:
+          $ref: '#/definitions/models.Player'
+        type: array
+    type: object
+  models.Player:
+    properties:
+      discord:
+        $ref: '#/definitions/models.DiscordUser'
+      player:
+        $ref: '#/definitions/models.MinecraftPlayer'
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+info:
+  contact:
+    url: https://discord.gg/J23U4YEaAr
+  description: This is the API for the Lambda Discord RPC handler
+  license:
+    name: GNU General Public License v3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+  title: Lambda RPC API
+  version: "1.0"
+paths:
+  /party/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new party
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Party'
+      security:
+      - Bearer: []
+      summary: Create a new party
+      tags:
+      - Party
+  /party/join:
+    post:
+      consumes:
+      - application/json
+      description: Join a party
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Party'
+      security:
+      - Bearer: []
+      summary: Join a party
+      tags:
+      - Party
+  /party/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to the server using a Discord identify token, a Minecraft
+        username and a Mojang session hash
+      parameters:
+      - description: Discord identify token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Minecraft username
+        in: header
+        name: username
+        required: true
+        type: string
+      - description: Mojang session hash
+        in: header
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Authentication'
+      summary: Login to the server
+      tags:
+      - Party
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

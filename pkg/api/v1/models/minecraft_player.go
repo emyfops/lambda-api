@@ -1,4 +1,4 @@
-package util
+package models
 
 import (
 	"encoding/json"
@@ -7,16 +7,16 @@ import (
 	"net/http"
 )
 
-type Player struct {
+type MinecraftPlayer struct {
 	Name string `json:"name"`
-	ID   int    `json:"id"`
+	UUID string `json:"id"`
 }
 
-// IsConnected authenticates a user with the Mojang session hash.
+// GetMinecraft authenticates a user with the Mojang session hash.
 // It is used to prove that a user owns a Minecraft account and is connected
 // to a server without requiring OAuth2 authentication.
 // However, the session hash is only valid for a very small time-frame.
-func IsConnected(name, hash string) *Player {
+func GetMinecraft(name, hash string) *MinecraftPlayer {
 	req, _ := http.NewRequest("GET", fmt.Sprintf("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=%s&serverId=%s", name, hash), nil)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -27,8 +27,8 @@ func IsConnected(name, hash string) *Player {
 		return nil
 	}
 
-	var mojangResp *Player
-	json.Unmarshal(body, &mojangResp)
+	var mojangResp *MinecraftPlayer
+	_ = json.Unmarshal(body, &mojangResp)
 
 	return mojangResp
 }

@@ -1,0 +1,49 @@
+package endpoints
+
+import (
+	"github.com/Edouard127/lambda-rpc/internal/util"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"time"
+)
+
+// Login godoc
+// @BasePath /api/v1
+// @Summary Login to the server
+// @Description Login to the server using a Discord identify token, a Minecraft username and a Mojang session hash
+// @Tags Party
+// @Accept json
+// @Produce json
+// @Param token header string true "Discord identify token"
+// @Param username header string true "Minecraft username"
+// @Param hash header string true "Mojang session hash"
+// @Success 200 {object} models.Authentication
+// @Router /party/login [post]
+func Login(ctx *gin.Context) {
+	token := ctx.Param("token")       // Discord identify token
+	username := ctx.Param("username") // Minecraft username
+	hash := ctx.Param("hash")         // Mojang session hash
+
+	// Check if the user is already connected
+	player := models.GetPlayer(username, hash, token)
+	if player != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
+		})
+	}
+
+	signed, err := util.CreateJwtToken(*player)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "An error occurred while signing the token",
+		})
+	}
+
+	ctx.AbortWithStatusJSON(http.StatusOK, models.Authentication{
+		AccessToken: signed,
+		ExpiresIn:   time.Hour * 24,
+		TokenType:   "Bearer",
+		Message:     "Successfully logged in.",
+	})
+}

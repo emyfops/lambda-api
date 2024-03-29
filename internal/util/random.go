@@ -15,7 +15,7 @@ const (
 	letterIdxMax  = 63 / letterIdxBits   // Number of letter indices fitting in 63 bits
 )
 
-func RandStringBytesMaskSrcUnsafe(n int) string {
+func RandBytesMaskSrcUnsafe(n int) []byte {
 	b := make([]byte, n)
 
 	// The index is n-1 because we are 0-indexed.
@@ -42,6 +42,12 @@ func RandStringBytesMaskSrcUnsafe(n int) string {
 		cache >>= letterIdxBits
 		remain--
 	}
+
+	return b
+}
+
+func RandStringBytesMaskSrcUnsafe(n int) string {
+	b := RandBytesMaskSrcUnsafe(n)
 
 	// The length of b is n, so we can safely cast it to a string
 	// and avoid the overhead of a copy.
