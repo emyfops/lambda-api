@@ -8,6 +8,8 @@ type Player struct {
 	Discord DiscordUser `json:"discord"`
 }
 
+// GetPlayer returns a new player with the given name, hash and token.
+// It returns nil if the player is not found.
 func GetPlayer(name, hash, token string) *Player {
 	minecraft := GetMinecraft(name, hash)
 	discord := GetDiscord(token)
