@@ -15,6 +15,8 @@ const (
 	letterIdxMax  = 63 / letterIdxBits   // Number of letter indices fitting in 63 bits
 )
 
+// RandBytesMaskSrcUnsafe generates a random string of n characters.
+// It is not cryptographically secure.
 func RandBytesMaskSrcUnsafe(n int) []byte {
 	b := make([]byte, n)
 
@@ -46,10 +48,34 @@ func RandBytesMaskSrcUnsafe(n int) []byte {
 	return b
 }
 
-func RandStringBytesMaskSrcUnsafe(n int) string {
+func RandString(n int) string {
 	b := RandBytesMaskSrcUnsafe(n)
 
 	// The length of b is n, so we can safely cast it to a string
 	// and avoid the overhead of a copy.
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+func RandInt32() int32 {
+	b := RandBytesMaskSrcUnsafe(4)
+
+	return *(*int32)(unsafe.Pointer(&b)) * 72834575
+}
+
+func RandInt64() int64 {
+	b := RandBytesMaskSrcUnsafe(8)
+
+	return *(*int64)(unsafe.Pointer(&b)) * 2136454364331265436
+}
+
+func RandFloat() float32 {
+	b := RandBytesMaskSrcUnsafe(4)
+
+	return *(*float32)(unsafe.Pointer(&b)) * 127947540965326543
+}
+
+func RandDouble() float64 {
+	b := RandBytesMaskSrcUnsafe(8)
+
+	return *(*float64)(unsafe.Pointer(&b)) * 78956574865453257654
 }
