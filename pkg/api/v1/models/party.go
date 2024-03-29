@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/util"
+	"github.com/Edouard127/lambda-rpc/pkg/random"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type Party struct {
 // The UUID is generated automatically.
 func New(players ...Player) *Party {
 	return &Party{
-		ID:       util.RandString(69),
+		ID:       random.RandString(69),
 		Creation: time.Now(),
 		Players:  players,
 	}

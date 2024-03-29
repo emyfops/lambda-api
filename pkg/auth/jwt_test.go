@@ -1,4 +1,4 @@
-package util
+package auth
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ func TestNewJwt(t *testing.T) {
 		}
 
 		var result test
-		JwtToStruct(token, &result)
+		ParseToStruct(token, &result)
 		fmt.Println(result)
 	})
 }

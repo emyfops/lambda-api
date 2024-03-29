@@ -1,8 +1,7 @@
-package cache
+package io
 
 import (
 	"context"
-	"github.com/Edouard127/lambda-rpc/pkg/background"
 	"sync"
 	"time"
 )
@@ -64,7 +63,7 @@ func NewTempMemoryCache[T comparable, K any](timeout time.Duration, accumulation
 	}
 
 	if !c.persistent {
-		go background.Ticker(c.ctx, eatInterval, false, c.devour)
+		go Ticker(c.ctx, eatInterval, false, c.devour)
 	}
 	return c
 }

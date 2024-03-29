@@ -2,14 +2,14 @@ package endpoints
 
 import (
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
-	"github.com/Edouard127/lambda-rpc/pkg/cache"
+	"github.com/Edouard127/lambda-rpc/pkg/io"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 // Persistent memory map to store the parties
 // Party ID -> Party
-var partyMap = cache.NewPersistentMemoryCache[string, *models.Party](0)
+var partyMap = io.NewPersistentMemoryCache[string, *models.Party](0)
 
 // CreateParty godoc
 // @BasePath /api/v1

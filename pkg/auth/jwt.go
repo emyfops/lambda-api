@@ -1,4 +1,4 @@
-package util
+package auth
 
 import (
 	"bytes"
@@ -79,7 +79,7 @@ func ParseJwtToken(signed string) (token *jwt.Token, err error) {
 	return token, nil
 }
 
-func JwtToStruct[T any](token *jwt.Token, result *T) error {
+func ParseToStruct[T any](token *jwt.Token, result *T) error {
 	parsed, ok := token.Claims.(jwt.MapClaims)["data"]
 	if !ok {
 		return errors.New("data field not found in JWT claims")

@@ -1,8 +1,8 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/util"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -34,7 +34,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	signed, err := util.CreateJwtToken(*player)
+	signed, err := auth.CreateJwtToken(*player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "An error occurred while signing the token",
