@@ -1,12 +1,11 @@
 package main
 
 import (
+	_ "github.com/Edouard127/lambda-rpc/api/openapi-spec"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	_ "github.com/Edouard127/lambda-rpc/api/openapi-spec"
 )
 
 // @securityDefinitions.apikey Bearer
