@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/Edouard127/lambda-rpc/pkg/io"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,6 +12,9 @@ import (
 // Party ID -> Party
 var partyMap = io.NewPersistentMemoryCache[string, *models.Party](0)
 
+// Player -> Party ID
+var playerMap = io.NewPersistentMemoryCache[models.Player, string](0)
+
 // CreateParty godoc
 // @BasePath /api/v1
 // @Summary Create a new party
@@ -19,34 +23,24 @@ var partyMap = io.NewPersistentMemoryCache[string, *models.Party](0)
 // @Accept json
 // @Produce json
 // @Success 201 {object} models.Party
+// @Failure 409 {object} models.Party
 // @Router /party/create [post]
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
-	username := ctx.GetString("username")
-	hash := ctx.GetString("hash")
-	token := ctx.GetString("token")
+	player := auth.GinMustGet[models.Player](ctx, "player")
 
-	// Check if the user is allowed to create a party
-	player := models.GetPlayer(username, hash, token)
-	if player == nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
-		})
-	}
-
-	// Check if the user is already in a party
-	if _, exists := partyMap.Get(hash); exists {
+	// Check if the player is already in a party
+	if partyID, exists := playerMap.Get(player); exists {
 		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 			"message": "You are already in a party",
+			"party":   partyMap.Get(partyID),
 		})
 	}
 
 	// Create a party
-	p := models.New(*player)
-	partyMap.Set(p.ID, p)
+	party := models.New(player)
+	partyMap.Set(party.ID, party)
+	playerMap.Set(player, party.ID)
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "Party created",
-		"party":   p,
-	})
+	ctx.JSON(http.StatusCreated, party)
 }
