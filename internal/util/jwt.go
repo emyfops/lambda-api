@@ -13,18 +13,33 @@ import (
 	"time"
 )
 
-var privKey = unwrap(rsa.GenerateKey(rand.Reader, 2048)) // TODO: You probably want to keep this key in a file
-var pubKey = &privKey.PublicKey
-var pubKeyBytes = unwrap(x509.MarshalPKIXPublicKey(pubKey))
-var pubKeyBlock = &pem.Block{
-	Type:  "PUBLIC KEY",
-	Bytes: pubKeyBytes,
-}
+var privKey *rsa.PrivateKey
+var pubKey *rsa.PublicKey
+var pubKeyBytes []byte
+var pubKeyBlock *pem.Block
 var pubKeyBuffer bytes.Buffer
 
 func init() {
-	err := pem.Encode(&pubKeyBuffer, pubKeyBlock)
+	var err error
+
+	privKey, err = rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
+		panic(fmt.Sprintf("failed to generate key: %s\n", err))
+	}
+
+	pubKey = &privKey.PublicKey
+
+	pubKeyBytes, err = x509.MarshalPKIXPublicKey(pubKey)
+	if err != nil {
+		panic(fmt.Sprintf("failed to marshal public key: %s\n", err))
+	}
+
+	pubKeyBlock = &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: pubKeyBytes,
+	}
+
+	if err := pem.Encode(&pubKeyBuffer, pubKeyBlock); err != nil {
 		panic(fmt.Sprintf("failed to encode public key: %s\n", err))
 	}
 }
