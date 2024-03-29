@@ -27,10 +27,11 @@ func Login(ctx *gin.Context) {
 
 	// Check if the user is already connected
 	player := models.GetPlayer(username, hash, token)
-	if player != nil {
+	if player == nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
 		})
+		return
 	}
 
 	signed, err := util.CreateJwtToken(*player)
