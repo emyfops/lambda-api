@@ -31,9 +31,10 @@ func CreateParty(ctx *gin.Context) {
 
 	// Check if the player is already in a party
 	if partyID, exists := playerMap.Get(player); exists {
+		party, _ := partyMap.Get(partyID)
 		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 			"message": "You are already in a party",
-			"party":   partyMap.Get(partyID),
+			"party":   party,
 		})
 	}
 
