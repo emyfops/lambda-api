@@ -43,5 +43,5 @@ func CreateParty(ctx *gin.Context) {
 	partyMap.Set(party.ID, party)
 	playerMap.Set(player, party.ID)
 
-	ctx.JSON(http.StatusCreated, party)
+	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 }

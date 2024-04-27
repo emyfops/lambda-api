@@ -14,20 +14,14 @@ import (
 // @Tags Party
 // @Accept json
 // @Produce json
-// @Success 201 {object} models.Party
-// @Router /party/join [post]
+// @Param ID query string true "Party ID"
+// @Success 202 {object} models.Party
+// @Router /party/join [put]
 // @Security Bearer
 func JoinParty(ctx *gin.Context) {
 	player := auth.GinMustGet[models.Player](ctx, "player")
 
-	id, exists := playerMap.Get(player)
-	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Party not found",
-		})
-	}
-
-	party, exists := partyMap.Get(id)
+	party, exists := partyMap.Get(ctx.Query("ID"))
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"message": "Party not found",
@@ -35,6 +29,5 @@ func JoinParty(ctx *gin.Context) {
 	}
 
 	party.Add(player)
-
-	ctx.JSON(http.StatusCreated, party)
+	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
 }
