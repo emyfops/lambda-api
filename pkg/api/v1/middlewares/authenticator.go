@@ -13,7 +13,7 @@ func CheckAuth(ctx *gin.Context) {
 	token := strings.Split(authorization, "Bearer ")
 	if len(token) != 2 {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
+			"message": "The Authorization header is missing or invalid, please provide a valid JWT token with the Bearer prefix",
 		})
 		return
 	}
@@ -21,7 +21,7 @@ func CheckAuth(ctx *gin.Context) {
 	jwt, err := auth.ParseJwtToken(token[1])
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
+			"message": "The JWT token is invalid, please provide a valid JWT token",
 		})
 		return
 	}
