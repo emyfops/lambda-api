@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -26,7 +26,7 @@ func CheckAuth(ctx *gin.Context) {
 		return
 	}
 
-	var player models.Player
+	var player response.Player
 	err = auth.ParseToStruct(jwt, &player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{

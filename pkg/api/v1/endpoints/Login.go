@@ -1,7 +1,8 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,23 +16,24 @@ import (
 // @Tags Party
 // @Accept json
 // @Produce json
-// @Param token body string true "Discord identify token"
-// @Param username body string true "Minecraft username"
-// @Param hash body string true "Mojang session hash"
-// @Error 401 {object} models.Error
-// @Error 500 {object} models.Error
-// @Success 200 {object} models.Authentication
+// @Param login body request.Authentication true "Authentication"
+// @Success 200 {object} response.Authentication
 // @Router /party/login [post]
 func Login(ctx *gin.Context) {
-	token := ctx.Param("token")       // Discord identify token
-	username := ctx.Param("username") // Minecraft username
-	hash := ctx.Param("hash")         // Mojang session hash
+	var login request.Authentication
+	if err := ctx.ShouldBind(&login); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	// Check if the user is already connected
-	player, err := models.GetPlayer(username, hash, token)
+	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
+			"message": "You either have an invalid discord account or the hash has expired, please reconnect to the server",
 		})
 		return
 	}
@@ -43,7 +45,7 @@ func Login(ctx *gin.Context) {
 		})
 	}
 
-	ctx.AbortWithStatusJSON(http.StatusOK, models.Authentication{
+	ctx.AbortWithStatusJSON(http.StatusOK, response.Authentication{
 		AccessToken: signed,
 		ExpiresIn:   int64(time.Hour * 24),
 		TokenType:   "Bearer",

@@ -1,75 +1,35 @@
 basePath: /api/v1
 definitions:
-  models.Authentication:
+  request.Authentication:
     properties:
-      accessToken:
+      hash:
         description: |-
-          The access token to use for the API
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          The player's Mojang session hash.
+          example: 069a79f444e94726a5befca90e38aaf5
         type: string
-      expiresIn:
+      token:
         description: |-
-          The duration of the token (in seconds).
-          example: 3600
-        type: integer
-      tokenType:
-        description: |-
-          The type of the token.
-          example: Bearer
+          The player's Discord token.
+          example: OTk1MTU1NzcyMzYxMTQ2NDM4.AAAAAA.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
         type: string
-    type: object
-  models.Party:
-    properties:
-      creation:
+      username:
         description: |-
-          The creation date of the party.
-          example: 2021-10-10T12:00:00Z
-        type: string
-      id:
-        description: |-
-          The ID of the party.
-          It is a random string of 69 characters.
-        type: string
-      leader:
-        allOf:
-        - $ref: '#/definitions/models.Player'
-        description: The leader of the party.
-      players:
-        description: The list of players in the party.
-        items:
-          $ref: '#/definitions/models.Player'
-        type: array
-      settings:
-        allOf:
-        - $ref: '#/definitions/models.Settings'
-        description: The settings of the party.
-    type: object
-  models.Player:
-    properties:
-      discordID:
-        description: |-
-          The player's Discord ID.
-          example: "385441179069579265"
-        type: string
-      name:
-        description: |-
-          The player's name.
+          The player's username.
           example: Notch
         type: string
-      uuid:
-        description: |-
-          The player's UUID.
-          example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
-        type: string
+    required:
+    - hash
+    - token
+    - username
     type: object
-  models.Settings:
+  request.Settings:
     properties:
       listed:
         description: |-
           Whether the party can be listed or not.
           example: true
         type: boolean
-      maxPlayers:
+      max_players:
         description: |-
           The maximum number of players in the party.
           example: 10
@@ -80,6 +40,100 @@ definitions:
           If false can only be joined by invite.
           example: true
         type: boolean
+    required:
+    - listed
+    - max_players
+    - public
+    type: object
+  response.Authentication:
+    properties:
+      access_token:
+        description: |-
+          The access token to use for the API
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        type: string
+      expires_in:
+        description: |-
+          The duration of the token (in seconds).
+          example: 3600
+        type: integer
+      token_type:
+        description: |-
+          The type of the token.
+          example: Bearer
+        type: string
+    type: object
+  response.Party:
+    properties:
+      creation:
+        description: |-
+          The creation date of the party.
+          example: 2021-10-10T12:00:00Z
+        type: string
+      id:
+        description: |-
+          The ID of the party.
+          It is a random string of 30 characters.
+        type: string
+      join_secret:
+        description: |-
+          The join secret of the party.
+          It is a random string of 100 characters.
+        type: string
+      leader:
+        allOf:
+        - $ref: '#/definitions/response.Player'
+        description: The leader of the party.
+      players:
+        description: The list of players in the party.
+        items:
+          $ref: '#/definitions/response.Player'
+        type: array
+      settings:
+        allOf:
+        - $ref: '#/definitions/response.Settings'
+        description: The settings of the party.
+    type: object
+  response.Player:
+    properties:
+      discord_id:
+        description: |-
+          The player's Discord ID.
+          example: "385441179069579265"
+        type: string
+      id:
+        description: |-
+          The player's UUID.
+          example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
+        type: string
+      name:
+        description: |-
+          The player's name.
+          example: Notch
+        type: string
+    type: object
+  response.Settings:
+    properties:
+      listed:
+        description: |-
+          Whether the party can be listed or not.
+          example: true
+        type: boolean
+      max_players:
+        description: |-
+          The maximum number of players in the party.
+          example: 10
+        type: integer
+      public:
+        description: |-
+          Whether the party is public or not.
+          If false can only be joined by invite.
+          example: true
+        type: boolean
+    required:
+    - listed
+    - max_players
+    - public
     type: object
 info:
   contact:
@@ -102,18 +156,14 @@ paths:
         in: body
         name: Settings
         schema:
-          $ref: '#/definitions/models.Settings'
+          $ref: '#/definitions/request.Settings'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Party'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/models.Party'
+            $ref: '#/definitions/response.Party'
       security:
       - Bearer: []
       summary: Create a new party
@@ -126,17 +176,18 @@ paths:
       description: Join a party
       parameters:
       - description: Party ID
-        in: query
+        in: body
         name: ID
         required: true
-        type: string
+        schema:
+          type: string
       produces:
       - application/json
       responses:
         "202":
           description: Accepted
           schema:
-            $ref: '#/definitions/models.Party'
+            $ref: '#/definitions/response.Party'
       security:
       - Bearer: []
       summary: Join a party
@@ -149,31 +200,19 @@ paths:
       description: Login to the server using a Discord identify token, a Minecraft
         username and a Mojang session hash
       parameters:
-      - description: Discord identify token
+      - description: Authentication
         in: body
-        name: token
+        name: login
         required: true
         schema:
-          type: string
-      - description: Minecraft username
-        in: body
-        name: username
-        required: true
-        schema:
-          type: string
-      - description: Mojang session hash
-        in: body
-        name: hash
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/request.Authentication'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Authentication'
+            $ref: '#/definitions/response.Authentication'
       summary: Login to the server
       tags:
       - Party

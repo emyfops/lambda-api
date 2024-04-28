@@ -1,4 +1,4 @@
-package models
+package response
 
 // Authentication represents the response from the authentication endpoint.
 type Authentication struct {

@@ -1,7 +1,8 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/Edouard127/lambda-rpc/pkg/io"
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,10 @@ import (
 
 // Persistent memory map to store the parties
 // Party ID -> Party
-var partyMap = io.NewPersistentMemoryCache[string, *models.Party](0)
+var partyMap = io.NewPersistentMemoryCache[string, *response.Party](0)
 
 // Player -> Party ID
-var playerMap = io.NewPersistentMemoryCache[models.Player, string](0)
+var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
 
 // CreateParty godoc
 // @BasePath /api/v1
@@ -22,19 +23,22 @@ var playerMap = io.NewPersistentMemoryCache[models.Player, string](0)
 // @Tags Party
 // @Accept json
 // @Produce json
-// @Param Settings body models.Settings false "Settings"
-// @Success 201 {object} models.Party
-// @Failure 409 {object} models.Party
+// @Param Settings body request.Settings false "Settings"
+// @Success 201 {object} response.Party
 // @Router /party/create [post]
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
-	var settings *models.Settings
-	err := ctx.BindJSON(&settings)
-	if err != nil {
+	var settings request.Settings
+
+	if err := ctx.ShouldBind(&settings); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
 		return
 	}
 
-	player := auth.GinMustGet[models.Player](ctx, "player")
+	player := auth.GinMustGet[response.Player](ctx, "player")
 
 	// Check if the player is already in a party
 	if partyID, exists := playerMap.Get(player); exists {
@@ -45,7 +49,7 @@ func CreateParty(ctx *gin.Context) {
 		})
 	}
 
-	party := models.NewWithSettings(player, settings)
+	party := response.NewWithSettings(player, &settings)
 
 	partyMap.Set(party.ID, party)
 	playerMap.Set(player, party.ID) // Reverse mapping

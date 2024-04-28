@@ -39,7 +39,7 @@
                         "name": "Settings",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/models.Settings"
+                            "$ref": "#/definitions/request.Settings"
                         }
                     }
                 ],
@@ -47,13 +47,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Party"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/models.Party"
+                            "$ref": "#/definitions/response.Party"
                         }
                     }
                 }
@@ -79,18 +73,20 @@
                 "summary": "Join a party",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Party ID",
                         "name": "ID",
-                        "in": "query",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "202": {
                         "description": "Accepted",
                         "schema": {
-                            "$ref": "#/definitions/models.Party"
+                            "$ref": "#/definitions/response.Party"
                         }
                     }
                 }
@@ -111,30 +107,12 @@
                 "summary": "Login to the server",
                 "parameters": [
                     {
-                        "description": "Discord identify token",
-                        "name": "token",
+                        "description": "Authentication",
+                        "name": "login",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Minecraft username",
-                        "name": "username",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Mojang session hash",
-                        "name": "hash",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/request.Authentication"
                         }
                     }
                 ],
@@ -142,7 +120,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Authentication"
+                            "$ref": "#/definitions/response.Authentication"
                         }
                     }
                 }
@@ -150,24 +128,68 @@
         }
     },
     "definitions": {
-        "models.Authentication": {
+        "request.Authentication": {
+            "type": "object",
+            "required": [
+                "hash",
+                "token",
+                "username"
+            ],
+            "properties": {
+                "hash": {
+                    "description": "The player's Mojang session hash.\nexample: 069a79f444e94726a5befca90e38aaf5",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "The player's Discord token.\nexample: OTk1MTU1NzcyMzYxMTQ2NDM4.AAAAAA.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The player's username.\nexample: Notch",
+                    "type": "string"
+                }
+            }
+        },
+        "request.Settings": {
+            "type": "object",
+            "required": [
+                "listed",
+                "max_players",
+                "public"
+            ],
+            "properties": {
+                "listed": {
+                    "description": "Whether the party can be listed or not.\nexample: true",
+                    "type": "boolean"
+                },
+                "max_players": {
+                    "description": "The maximum number of players in the party.\nexample: 10",
+                    "type": "integer"
+                },
+                "public": {
+                    "description": "Whether the party is public or not.\nIf false can only be joined by invite.\nexample: true",
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.Authentication": {
             "type": "object",
             "properties": {
-                "accessToken": {
+                "access_token": {
                     "description": "The access token to use for the API\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
                     "type": "string"
                 },
-                "expiresIn": {
+                "expires_in": {
                     "description": "The duration of the token (in seconds).\nexample: 3600",
                     "type": "integer"
                 },
-                "tokenType": {
+                "token_type": {
                     "description": "The type of the token.\nexample: Bearer",
                     "type": "string"
                 }
             }
         },
-        "models.Party": {
+        "response.Party": {
             "type": "object",
             "properties": {
                 "creation": {
@@ -175,14 +197,18 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "The ID of the party.\nIt is a random string of 69 characters.",
+                    "description": "The ID of the party.\nIt is a random string of 30 characters.",
+                    "type": "string"
+                },
+                "join_secret": {
+                    "description": "The join secret of the party.\nIt is a random string of 100 characters.",
                     "type": "string"
                 },
                 "leader": {
                     "description": "The leader of the party.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Player"
+                            "$ref": "#/definitions/response.Player"
                         }
                     ]
                 },
@@ -190,44 +216,49 @@
                     "description": "The list of players in the party.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Player"
+                        "$ref": "#/definitions/response.Player"
                     }
                 },
                 "settings": {
                     "description": "The settings of the party.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Settings"
+                            "$ref": "#/definitions/response.Settings"
                         }
                     ]
                 }
             }
         },
-        "models.Player": {
+        "response.Player": {
             "type": "object",
             "properties": {
-                "discordID": {
+                "discord_id": {
                     "description": "The player's Discord ID.\nexample: \"385441179069579265\"",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "The player's UUID.\nexample: 069a79f4-44e9-4726-a5be-fca90e38aaf5",
                     "type": "string"
                 },
                 "name": {
                     "description": "The player's name.\nexample: Notch",
                     "type": "string"
-                },
-                "uuid": {
-                    "description": "The player's UUID.\nexample: 069a79f4-44e9-4726-a5be-fca90e38aaf5",
-                    "type": "string"
                 }
             }
         },
-        "models.Settings": {
+        "response.Settings": {
             "type": "object",
+            "required": [
+                "listed",
+                "max_players",
+                "public"
+            ],
             "properties": {
                 "listed": {
                     "description": "Whether the party can be listed or not.\nexample: true",
                     "type": "boolean"
                 },
-                "maxPlayers": {
+                "max_players": {
                     "description": "The maximum number of players in the party.\nexample: 10",
                     "type": "integer"
                 },

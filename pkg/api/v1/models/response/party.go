@@ -1,4 +1,4 @@
-package models
+package response
 
 import (
 	"github.com/Edouard127/lambda-rpc/pkg/random"
@@ -9,8 +9,12 @@ import (
 // It contains an ID, a creation date and a list of players.
 type Party struct {
 	// The ID of the party.
-	// It is a random string of 69 characters.
+	// It is a random string of 30 characters.
 	ID string `json:"id"`
+
+	// The join secret of the party.
+	// It is a random string of 100 characters.
+	JoinSecret string `json:"join_secret"`
 
 	// The leader of the party.
 	Leader Player `json:"leader"`
@@ -33,11 +37,12 @@ func NewWithSettings(leader Player, settings *Settings) *Party {
 	}
 
 	return &Party{
-		ID:       random.RandString(30),
-		Leader:   leader,
-		Creation: time.Now(),
-		Players:  []Player{leader},
-		Settings: *settings,
+		ID:         random.RandString(30),
+		JoinSecret: random.RandString(100),
+		Leader:     leader,
+		Creation:   time.Now(),
+		Players:    []Player{leader},
+		Settings:   *settings,
 	}
 }
 

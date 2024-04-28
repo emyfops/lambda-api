@@ -1,7 +1,8 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,14 +15,24 @@ import (
 // @Tags Party
 // @Accept json
 // @Produce json
-// @Param ID query string true "Party ID"
-// @Success 202 {object} models.Party
+// @Param ID body string true "Party ID"
+// @Success 202 {object} response.Party
 // @Router /party/join [put]
 // @Security Bearer
 func JoinParty(ctx *gin.Context) {
-	player := auth.GinMustGet[models.Player](ctx, "player")
+	var join request.JoinParty
 
-	party, exists := partyMap.Get(ctx.Query("ID"))
+	if err := ctx.ShouldBind(&join); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	player := auth.GinMustGet[response.Player](ctx, "player")
+
+	party, exists := partyMap.Get(join.ID)
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"message": "Party not found",
@@ -29,5 +40,7 @@ func JoinParty(ctx *gin.Context) {
 	}
 
 	party.Add(player)
+
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
+	return
 }

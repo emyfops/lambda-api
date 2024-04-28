@@ -1,4 +1,4 @@
-package models
+package response
 
 import (
 	"encoding/json"
@@ -23,7 +23,7 @@ type Player struct {
 
 // GetPlayer returns a new player with the given name, hash and token.
 // Returns nil if the Minecraft or Discord account is invalid.
-func GetPlayer(name, hash, token string) (pl Player, err error) {
+func GetPlayer(token, name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if err != nil {
 		return
