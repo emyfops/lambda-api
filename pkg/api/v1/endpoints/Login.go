@@ -15,9 +15,11 @@ import (
 // @Tags Party
 // @Accept json
 // @Produce json
-// @Param token header string true "Discord identify token"
-// @Param username header string true "Minecraft username"
-// @Param hash header string true "Mojang session hash"
+// @Param token body string true "Discord identify token"
+// @Param username body string true "Minecraft username"
+// @Param hash body string true "Mojang session hash"
+// @Error 401 {object} models.Error
+// @Error 500 {object} models.Error
 // @Success 200 {object} models.Authentication
 // @Router /party/login [post]
 func Login(ctx *gin.Context) {

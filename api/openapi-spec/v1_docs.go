@@ -40,6 +40,16 @@ const docTemplatev1 = `{
                     "Party"
                 ],
                 "summary": "Create a new party",
+                "parameters": [
+                    {
+                        "description": "Settings",
+                        "name": "Settings",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.Settings"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -57,7 +67,7 @@ const docTemplatev1 = `{
             }
         },
         "/party/join": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "Bearer": []
@@ -74,9 +84,18 @@ const docTemplatev1 = `{
                     "Party"
                 ],
                 "summary": "Join a party",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Party ID",
+                        "name": "ID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "202": {
+                        "description": "Accepted",
                         "schema": {
                             "$ref": "#/definitions/models.Party"
                         }
@@ -99,25 +118,31 @@ const docTemplatev1 = `{
                 "summary": "Login to the server",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Discord identify token",
                         "name": "token",
-                        "in": "header",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     },
                     {
-                        "type": "string",
                         "description": "Minecraft username",
                         "name": "username",
-                        "in": "header",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     },
                     {
-                        "type": "string",
                         "description": "Mojang session hash",
                         "name": "hash",
-                        "in": "header",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -135,50 +160,16 @@ const docTemplatev1 = `{
         "models.Authentication": {
             "type": "object",
             "properties": {
-                "access_token": {
+                "accessToken": {
                     "description": "The access token to use for the API\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
                     "type": "string"
                 },
-                "expires_in": {
+                "expiresIn": {
                     "description": "The duration of the token (in seconds).\nexample: 3600",
                     "type": "integer"
                 },
-                "message": {
-                    "description": "The message to display to the user.\nexample: Successfully logged in.",
-                    "type": "string"
-                },
-                "token_type": {
+                "tokenType": {
                     "description": "The type of the token.\nexample: Bearer",
-                    "type": "string"
-                }
-            }
-        },
-        "models.DiscordUser": {
-            "type": "object",
-            "properties": {
-                "global_name": {
-                    "description": "The user's name.\nexample: john.doe",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "The user's ID.\nexample: 1234567890",
-                    "type": "integer"
-                },
-                "username": {
-                    "description": "The user's username.\nexample: John Doe",
-                    "type": "string"
-                }
-            }
-        },
-        "models.MinecraftPlayer": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "The player's UUID.\nexample: 069a79f4-44e9-4726-a5be-fca90e38aaf5",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "The player's name.\nexample: Notch",
                     "type": "string"
                 }
             }
@@ -194,33 +185,62 @@ const docTemplatev1 = `{
                     "description": "The ID of the party.\nIt is a random string of 69 characters.",
                     "type": "string"
                 },
+                "leader": {
+                    "description": "The leader of the party.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Player"
+                        }
+                    ]
+                },
                 "players": {
                     "description": "The list of players in the party.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Player"
                     }
+                },
+                "settings": {
+                    "description": "The settings of the party.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Settings"
+                        }
+                    ]
                 }
             }
         },
         "models.Player": {
             "type": "object",
             "properties": {
-                "discord": {
-                    "description": "The Discord user.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.DiscordUser"
-                        }
-                    ]
+                "discordID": {
+                    "description": "The player's Discord ID.\nexample: \"385441179069579265\"",
+                    "type": "string"
                 },
-                "player": {
-                    "description": "The Minecraft player.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.MinecraftPlayer"
-                        }
-                    ]
+                "name": {
+                    "description": "The player's name.\nexample: Notch",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "The player's UUID.\nexample: 069a79f4-44e9-4726-a5be-fca90e38aaf5",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Settings": {
+            "type": "object",
+            "properties": {
+                "listed": {
+                    "description": "Whether the party can be listed or not.\nexample: true",
+                    "type": "boolean"
+                },
+                "maxPlayers": {
+                    "description": "The maximum number of players in the party.\nexample: 10",
+                    "type": "integer"
+                },
+                "public": {
+                    "description": "Whether the party is public or not.\nIf false can only be joined by invite.\nexample: true",
+                    "type": "boolean"
                 }
             }
         }

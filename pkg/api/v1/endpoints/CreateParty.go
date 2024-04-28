@@ -22,11 +22,18 @@ var playerMap = io.NewPersistentMemoryCache[models.Player, string](0)
 // @Tags Party
 // @Accept json
 // @Produce json
+// @Param Settings body models.Settings false "Settings"
 // @Success 201 {object} models.Party
 // @Failure 409 {object} models.Party
 // @Router /party/create [post]
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
+	var settings *models.Settings
+	err := ctx.BindJSON(&settings)
+	if err != nil {
+		return
+	}
+
 	player := auth.GinMustGet[models.Player](ctx, "player")
 
 	// Check if the player is already in a party
@@ -38,8 +45,7 @@ func CreateParty(ctx *gin.Context) {
 		})
 	}
 
-	// Create a party
-	party := models.New(player)
+	party := models.NewWithSettings(player, settings)
 
 	partyMap.Set(party.ID, party)
 	playerMap.Set(player, party.ID) // Reverse mapping

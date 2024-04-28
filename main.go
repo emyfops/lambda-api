@@ -1,8 +1,10 @@
+//go:generate swag i -g main.go -dir .\pkg\api\v1\ --instanceName v1 -o api/openapi-spec
+
 package main
 
 import (
 	_ "github.com/Edouard127/lambda-rpc/api/openapi-spec"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1"
+	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

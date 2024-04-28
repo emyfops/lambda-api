@@ -7,11 +7,13 @@ import (
 
 // The Party represents a Discord party.
 // It contains an ID, a creation date and a list of players.
-// There is no leader in the party, all players have the same rights.
 type Party struct {
 	// The ID of the party.
 	// It is a random string of 69 characters.
 	ID string `json:"id"`
+
+	// The leader of the party.
+	Leader Player `json:"leader"`
 
 	// The creation date of the party.
 	// example: 2021-10-10T12:00:00Z
@@ -19,16 +21,29 @@ type Party struct {
 
 	// The list of players in the party.
 	Players []Player `json:"players"`
+
+	// The settings of the party.
+	Settings Settings `json:"settings"`
 }
 
-// New creates a new party with the given name and players.
-// The UUID is generated automatically.
-func New(players ...Player) *Party {
+// NewWithSettings returns a new party with the given leader and settings.
+func NewWithSettings(leader Player, settings *Settings) *Party {
+	if settings == nil {
+		settings = DefaultSettings
+	}
+
 	return &Party{
 		ID:       random.RandString(30),
+		Leader:   leader,
 		Creation: time.Now(),
-		Players:  players,
+		Players:  []Player{leader},
+		Settings: *settings,
 	}
+}
+
+// New returns a new party with the given leader and default settings.
+func New(leader Player) *Party {
+	return NewWithSettings(leader, DefaultSettings)
 }
 
 func (pt *Party) Add(player Player) {

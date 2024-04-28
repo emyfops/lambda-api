@@ -28,4 +28,5 @@ func Register(router *gin.Engine) {
 	v1.POST("/party/login", endpoints.Login)
 	v1.POST("/party/create", middlewares.CheckAuth, endpoints.CreateParty)
 	v1.PUT("/party/join", middlewares.CheckAuth, endpoints.JoinParty)
+	//v1.PATCH("/party/edit", middlewares.CheckAuth, endpoints.EditParty)
 }
