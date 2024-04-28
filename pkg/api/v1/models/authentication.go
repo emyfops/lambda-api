@@ -13,8 +13,4 @@ type Authentication struct {
 	// The type of the token.
 	// example: Bearer
 	TokenType string `json:"token_type"`
-
-	// The message to display to the user.
-	// example: Successfully logged in.
-	Message string `json:"message"`
 }

@@ -45,6 +45,5 @@ func Login(ctx *gin.Context) {
 		AccessToken: signed,
 		ExpiresIn:   int64(time.Hour * 24),
 		TokenType:   "Bearer",
-		Message:     "Successfully logged in.",
 	})
 }

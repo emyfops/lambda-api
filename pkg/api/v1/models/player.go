@@ -17,7 +17,7 @@ type Player struct {
 	UUID string `json:"id"`
 
 	// The player's Discord ID.
-	// example: "385441179069579265'
+	// example: "385441179069579265"
 	DiscordID string `json:"discord_id"`
 }
 
