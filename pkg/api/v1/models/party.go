@@ -25,7 +25,7 @@ type Party struct {
 // The UUID is generated automatically.
 func New(players ...Player) *Party {
 	return &Party{
-		ID:       random.RandString(69),
+		ID:       random.RandString(30),
 		Creation: time.Now(),
 		Players:  players,
 	}
@@ -37,7 +37,7 @@ func (pt *Party) Add(player Player) {
 
 func (pt *Party) Remove(player Player) {
 	for i, p := range pt.Players {
-		if p.Minecraft.UUID == player.Minecraft.UUID {
+		if p.UUID == player.UUID {
 			pt.Players = append(pt.Players[:i], pt.Players[i+1:]...)
 			return
 		}

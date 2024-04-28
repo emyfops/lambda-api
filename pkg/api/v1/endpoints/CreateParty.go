@@ -40,8 +40,10 @@ func CreateParty(ctx *gin.Context) {
 
 	// Create a party
 	party := models.New(player)
+
 	partyMap.Set(party.ID, party)
-	playerMap.Set(player, party.ID)
+	playerMap.Set(player, party.ID) // Reverse mapping
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
+	return
 }

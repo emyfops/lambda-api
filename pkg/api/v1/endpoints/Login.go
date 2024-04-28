@@ -26,15 +26,15 @@ func Login(ctx *gin.Context) {
 	hash := ctx.Param("hash")         // Mojang session hash
 
 	// Check if the user is already connected
-	player := models.GetPlayer(username, hash, token)
-	if player == nil {
+	player, err := models.GetPlayer(username, hash, token)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
 		})
 		return
 	}
 
-	signed, err := auth.CreateJwtToken(*player)
+	signed, err := auth.CreateJwtToken(player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "An error occurred while signing the token",
