@@ -9,7 +9,7 @@ type Player struct {
 }
 
 // GetPlayer returns a new player with the given name, hash and token.
-// It returns nil if the player is not found.
+// Returns nil if the Minecraft or Discord account is invalid.
 func GetPlayer(name, hash, token string) *Player {
 	minecraft := GetMinecraft(name, hash)
 	discord := GetDiscord(token)
