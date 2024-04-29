@@ -21,6 +21,10 @@ type Player struct {
 	DiscordID string `json:"discord_id"`
 }
 
+func (pl *Player) String() string {
+	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s}", pl.Name, pl.UUID, pl.DiscordID)
+}
+
 // GetPlayer returns a new player with the given name, hash and token.
 // Returns nil if the Minecraft or Discord account is invalid.
 func GetPlayer(token, name, hash string) (pl Player, err error) {
