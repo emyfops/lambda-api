@@ -157,6 +157,21 @@ paths:
       summary: Create a new party
       tags:
       - Party
+  /party/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing party
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete an existing party
+      tags:
+      - Party
   /party/edit:
     patch:
       consumes:

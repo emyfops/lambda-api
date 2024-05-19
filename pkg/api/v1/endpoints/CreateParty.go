@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"fmt"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
@@ -32,7 +31,6 @@ func CreateParty(ctx *gin.Context) {
 	var settings request.Settings
 
 	if err := ctx.Bind(&settings); err != nil {
-		fmt.Println(err)
 		return
 	}
 
@@ -41,10 +39,9 @@ func CreateParty(ctx *gin.Context) {
 	// Check if the player is already in a party
 	if partyID, exists := playerMap.Get(player); exists {
 		party, _ := partyMap.Get(partyID)
-		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
-			"message": "You are already in a party",
-			"party":   party,
-		})
+
+		// As long as the party is not deleted, we can return it
+		ctx.AbortWithStatusJSON(http.StatusOK, party)
 	}
 
 	party := response.NewWithSettings(player, &settings)
