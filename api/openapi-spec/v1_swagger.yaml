@@ -9,8 +9,8 @@ definitions:
         type: string
       token:
         description: |-
-          The player's Discord token.
-          example: OTk1MTU1NzcyMzYxMTQ2NDM4.AAAAAA.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+          The player's authentication Discord token.
+          example: OTk1MTU1NzcyMzYxMTQ2NDM4
         type: string
       username:
         description: |-
@@ -24,11 +24,6 @@ definitions:
     type: object
   request.Settings:
     properties:
-      listed:
-        description: |-
-          Whether the party can be listed or not.
-          example: true
-        type: boolean
       max_players:
         description: |-
           The maximum number of players in the party.
@@ -37,13 +32,12 @@ definitions:
       public:
         description: |-
           Whether the party is public or not.
-          If false can only be joined by invite.
+          If false can only be joined by Discord invites.
+          If true can be joined by anyone with the join secret
           example: true
         type: boolean
     required:
-    - listed
     - max_players
-    - public
     type: object
   response.Authentication:
     properties:
@@ -114,11 +108,6 @@ definitions:
     type: object
   response.Settings:
     properties:
-      listed:
-        description: |-
-          Whether the party can be listed or not.
-          example: true
-        type: boolean
       max_players:
         description: |-
           The maximum number of players in the party.
@@ -127,13 +116,12 @@ definitions:
       public:
         description: |-
           Whether the party is public or not.
-          If false can only be joined by invite.
+          If false can only be joined by Discord invites.
+          If true can be joined by anyone with the join secret
           example: true
         type: boolean
     required:
-    - listed
     - max_players
-    - public
     type: object
 info:
   contact:
@@ -167,6 +155,29 @@ paths:
       security:
       - Bearer: []
       summary: Create a new party
+      tags:
+      - Party
+  /party/edit:
+    patch:
+      consumes:
+      - application/json
+      description: Edit a party
+      parameters:
+      - description: Settings
+        in: body
+        name: Settings
+        schema:
+          $ref: '#/definitions/request.Settings'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/response.Party'
+      security:
+      - Bearer: []
+      summary: Edit a party
       tags:
       - Party
   /party/join:

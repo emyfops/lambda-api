@@ -22,11 +22,7 @@ import (
 func EditParty(ctx *gin.Context) {
 	var settings request.Settings
 
-	if err := ctx.ShouldBind(&settings); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request",
-			"error":   err.Error(),
-		})
+	if err := ctx.Bind(&settings); err != nil {
 		return
 	}
 

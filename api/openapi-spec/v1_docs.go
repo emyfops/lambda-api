@@ -60,6 +60,44 @@ const docTemplatev1 = `{
                 }
             }
         },
+        "/party/edit": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Edit a party",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Party"
+                ],
+                "summary": "Edit a party",
+                "parameters": [
+                    {
+                        "description": "Settings",
+                        "name": "Settings",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/request.Settings"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/response.Party"
+                        }
+                    }
+                }
+            }
+        },
         "/party/join": {
             "put": {
                 "security": [
@@ -148,7 +186,7 @@ const docTemplatev1 = `{
                     "type": "string"
                 },
                 "token": {
-                    "description": "The player's Discord token.\nexample: OTk1MTU1NzcyMzYxMTQ2NDM4.AAAAAA.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                    "description": "The player's authentication Discord token.\nexample: OTk1MTU1NzcyMzYxMTQ2NDM4",
                     "type": "string"
                 },
                 "username": {
@@ -160,21 +198,15 @@ const docTemplatev1 = `{
         "request.Settings": {
             "type": "object",
             "required": [
-                "listed",
-                "max_players",
-                "public"
+                "max_players"
             ],
             "properties": {
-                "listed": {
-                    "description": "Whether the party can be listed or not.\nexample: true",
-                    "type": "boolean"
-                },
                 "max_players": {
                     "description": "The maximum number of players in the party.\nexample: 10",
                     "type": "integer"
                 },
                 "public": {
-                    "description": "Whether the party is public or not.\nIf false can only be joined by invite.\nexample: true",
+                    "description": "Whether the party is public or not.\nIf false can only be joined by Discord invites.\nIf true can be joined by anyone with the join secret\nexample: true",
                     "type": "boolean"
                 }
             }
@@ -256,21 +288,15 @@ const docTemplatev1 = `{
         "response.Settings": {
             "type": "object",
             "required": [
-                "listed",
-                "max_players",
-                "public"
+                "max_players"
             ],
             "properties": {
-                "listed": {
-                    "description": "Whether the party can be listed or not.\nexample: true",
-                    "type": "boolean"
-                },
                 "max_players": {
                     "description": "The maximum number of players in the party.\nexample: 10",
                     "type": "integer"
                 },
                 "public": {
-                    "description": "Whether the party is public or not.\nIf false can only be joined by invite.\nexample: true",
+                    "description": "Whether the party is public or not.\nIf false can only be joined by Discord invites.\nIf true can be joined by anyone with the join secret\nexample: true",
                     "type": "boolean"
                 }
             }

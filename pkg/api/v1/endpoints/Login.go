@@ -21,15 +21,10 @@ import (
 // @Router /party/login [post]
 func Login(ctx *gin.Context) {
 	var login request.Authentication
-	if err := ctx.ShouldBind(&login); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request",
-			"error":   err.Error(),
-		})
+	if err := ctx.Bind(&login); err != nil {
 		return
 	}
 
-	// Check if the user is already connected
 	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{

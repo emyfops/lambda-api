@@ -25,6 +25,11 @@ func (pl *Player) String() string {
 	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s}", pl.Name, pl.UUID, pl.DiscordID)
 }
 
+type sharedPlayer struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+
 // GetPlayer returns a new player with the given name, hash and token.
 // Returns nil if the Minecraft or Discord account is invalid.
 func GetPlayer(token, name, hash string) (pl Player, err error) {
@@ -56,14 +61,22 @@ func GetMinecraft(name, hash string, player *Player) error {
 		return err
 	}
 
-	err = json.Unmarshal(body, player)
+	var shared sharedPlayer
+
+	err = json.Unmarshal(body, &shared)
+	if err != nil {
+		return err
+	}
+
+	player.Name = shared.Name
+	player.UUID = shared.ID
 
 	return err
 }
 
 // GetDiscord authenticates a user with the Discord token.
 func GetDiscord(token string, player *Player) error {
-	req, _ := http.NewRequest("GET", "https://discord.com/api/v9/users/@me", nil)
+	req, _ := http.NewRequest("GET", "https://discord.com/api/v10/users/@me", nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	resp, err := http.DefaultClient.Do(req)
@@ -74,5 +87,14 @@ func GetDiscord(token string, player *Player) error {
 		return nil
 	}
 
-	return json.Unmarshal(body, player)
+	var shared sharedPlayer
+
+	err = json.Unmarshal(body, &shared)
+	if err != nil {
+		return err
+	}
+
+	player.DiscordID = shared.ID
+
+	return err
 }

@@ -22,11 +22,7 @@ import (
 func JoinParty(ctx *gin.Context) {
 	var join request.JoinParty
 
-	if err := ctx.ShouldBind(&join); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request",
-			"error":   err.Error(),
-		})
+	if err := ctx.Bind(&join); err != nil {
 		return
 	}
 

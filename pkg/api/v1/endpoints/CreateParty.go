@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"fmt"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/Edouard127/lambda-rpc/pkg/auth"
@@ -30,11 +31,8 @@ var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
 func CreateParty(ctx *gin.Context) {
 	var settings request.Settings
 
-	if err := ctx.ShouldBind(&settings); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request",
-			"error":   err.Error(),
-		})
+	if err := ctx.Bind(&settings); err != nil {
+		fmt.Println(err)
 		return
 	}
 
