@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lambda-rpc-deployment
+  labels:
+    app: lambda-rpc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lambda-rpc
+  template:
+    metadata:
+      labels:
+        app: lambda-rpc
+    spec:
+      containers:
+        - name: lambda-rpc-container
+          image: docker.kamigen.xyz/lambda-rpc:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+      imagePullSecrets:
+      - name: regcrednexus # Example of how to use a secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lambda-rpc-service
+  labels:
+    app: lambda-rpc
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: lambda-rpc
+---
+#
+# DO NOT USE THIS IF YOU DON'T HAVE A TRAEFIK INGRESS CONTROLLER
+#
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: lambda-rpc-ingress
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: >-
+        Host(`lambda-rpc.kamigen.xyz`) && PathPrefix(`/api/v1/`)
+      services:
+        - name: lambda-rpc-service
+          port: 80
+  tls:
+    certResolver: le
