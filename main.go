@@ -7,17 +7,31 @@ import (
 	"fmt"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
+	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"io"
+	"net/netip"
 )
+
+var args struct {
+	Host netip.Addr `arg:"arg:-h,--host" env:"HOST" help:"Host address, supports v4 and v6" default:"127.0.0.1"`
+	Port int        `arg:"arg:-p,--port" env:"PORT" help:"Port number" default:"8080"`
+
+	Verbose string `arg:"arg:-v,--verbose" env:"VERBOSE" help:"Log level" default:"info" placeholder:"INFO | DEBUG | WARN | ERROR"`
+
+	AllowInsecure bool `arg:"arg:--allow-insecure" env:"ALLOW_INSECURE" help:"Allow insecure minecraft accounts to connect" default:"false"`
+}
+
+var _ = arg.Parse(&args)
 
 // @securityDefinitions.apikey Bearer
 // @in header
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
 func main() {
+	fmt.Println(args)
 	router := gin.New()
 
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
