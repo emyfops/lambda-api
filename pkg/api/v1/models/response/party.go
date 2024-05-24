@@ -1,7 +1,7 @@
 package response
 
 import (
-	"github.com/Edouard127/lambda-rpc/pkg/random"
+	"github.com/Edouard127/lambda-rpc/internal/app/random"
 	"time"
 )
 

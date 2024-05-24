@@ -1,8 +1,8 @@
 package endpoints
 
 import (
+	"github.com/Edouard127/lambda-rpc/internal/app/auth"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
-	"github.com/Edouard127/lambda-rpc/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
