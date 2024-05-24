@@ -5,7 +5,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	_ "github.com/Edouard127/lambda-rpc/api/openapi-spec"
+	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
