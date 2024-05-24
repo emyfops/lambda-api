@@ -16,15 +16,15 @@ import (
 )
 
 var args struct {
-	Host netip.Addr `arg:"arg:-h,--host" env:"HOST" help:"Host address, supports v4 and v6" default:"127.0.0.1"`
-	Port int        `arg:"arg:-p,--port" env:"PORT" help:"Port number" default:"8080"`
+	Host netip.Addr `arg:"-h,--host" help:"Host address, supports v4 and v6" default:"127.0.0.1"`
+	Port int        `arg:"-p,--port" help:"Port number" default:"8080"`
 
-	Verbose string `arg:"arg:-v,--verbose" env:"VERBOSE" help:"Log level" default:"info" placeholder:"INFO | DEBUG | WARN | ERROR"`
+	Verbose string `arg:"-v,--verbose" help:"Log level" default:"info" placeholder:"INFO | DEBUG | WARN | ERROR"`
 
-	AllowInsecure bool `arg:"arg:--allow-insecure" env:"ALLOW_INSECURE" help:"Allow insecure minecraft accounts to connect" default:"false"`
+	AllowInsecure bool `arg:"--allow-insecure" help:"Allow insecure minecraft accounts to connect" default:"false"`
 }
 
-var _ = arg.Parse(&args)
+var _ = arg.MustParse(&args)
 
 // @securityDefinitions.apikey Bearer
 // @in header

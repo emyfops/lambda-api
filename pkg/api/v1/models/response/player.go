@@ -25,9 +25,11 @@ func (pl *Player) String() string {
 	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s}", pl.Name, pl.UUID, pl.DiscordID)
 }
 
+// Because both the Minecraft and Discord API return the same structure,
+// we can use a shared structure to unmarshal the response.
 type sharedPlayer struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
+	Name string `json:"name"` // mojang only
+	ID   string `json:"id"`   // discord and mojang
 }
 
 // GetPlayer returns a new player with the given name, hash and token.
@@ -54,7 +56,6 @@ func GetMinecraft(name, hash string, player *Player) error {
 	}
 
 	resp, err := http.DefaultClient.Do(req)
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -71,7 +72,7 @@ func GetMinecraft(name, hash string, player *Player) error {
 	player.Name = shared.Name
 	player.UUID = shared.ID
 
-	return err
+	return resp.Body.Close()
 }
 
 // GetDiscord authenticates a user with the Discord token.
@@ -80,7 +81,6 @@ func GetDiscord(token string, player *Player) error {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	resp, err := http.DefaultClient.Do(req)
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -96,5 +96,5 @@ func GetDiscord(token string, player *Player) error {
 
 	player.DiscordID = shared.ID
 
-	return err
+	return resp.Body.Close()
 }
