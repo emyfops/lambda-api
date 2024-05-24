@@ -1,4 +1,4 @@
-//go:generate swag i -g main.go -dir .\pkg\api\v1\ --instanceName v1 -o api/openapi-spec
+//go:generate swag i -g main.go -dir .\pkg\api\v1\ --instanceName v1 -o openapi-spec
 
 package main
 
