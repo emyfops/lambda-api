@@ -2,10 +2,14 @@ package response
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	"io"
 	"net/http"
 )
+
+var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account")
 
 type Player struct {
 	// The player's name.
@@ -19,6 +23,10 @@ type Player struct {
 	// The player's Discord ID.
 	// example: "385441179069579265"
 	DiscordID string `json:"discord_id"`
+
+	// Whether the player is marked as unsafe.
+	// example: true
+	Unsafe bool `json:"unsafe"`
 }
 
 func (pl *Player) String() string {
@@ -33,10 +41,14 @@ type sharedPlayer struct {
 }
 
 // GetPlayer returns a new player with the given name, hash and token.
-// Returns nil if the Minecraft or Discord account is invalid.
 func GetPlayer(token, name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
-	if err != nil {
+	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
+		state.CurrentArgs.AllowInsecure {
+		// If the Minecraft account is invalid, we can still try to authenticate the player with Discord.
+		pl.Unsafe = true
+		err = nil
+	} else {
 		return
 	}
 
@@ -56,6 +68,11 @@ func GetMinecraft(name, hash string, player *Player) error {
 	}
 
 	resp, err := http.DefaultClient.Do(req)
+
+	if resp.StatusCode == http.StatusNoContent {
+		// We can assume that either the hash or the username is invalid.
+		return ErrCouldNotVerifyMinecraft
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

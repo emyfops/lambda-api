@@ -6,14 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Title Lambda RPC API
-// @Version 1.0
-// @Description This is the API for the Lambda Discord RPC handler
-// @Contact.Name Lambda Discord
-// @Contact.Url https://discord.gg/J23U4YEaAr
-//
-// @license.name GNU General Public License v3.0
-// @license.url https://www.gnu.org/licenses/gpl-3.0.html
 //
 // @BasePath /api/v1
 //
@@ -25,7 +17,7 @@ import (
 func Register(router *gin.Engine) {
 	v1 := router.Group("/api/v1")
 
-	v1.POST("/party/login", endpoints.Login)
+	v1.POST("/login", endpoints.Login)
 	v1.POST("/party/create", middlewares.CheckAuth, endpoints.CreateParty)
 	v1.PUT("/party/join", middlewares.CheckAuth, endpoints.JoinParty)
 	v1.PATCH("/party/edit", middlewares.CheckAuth, endpoints.EditParty)
