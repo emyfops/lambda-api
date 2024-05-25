@@ -12,7 +12,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-var _ = arg.MustParse(state.CurrentArgs)
+var _ = arg.MustParse(&state.CurrentArgs)
 
 // @Title Lambda RPC API
 // @Version 1.0
