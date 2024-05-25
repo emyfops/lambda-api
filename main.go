@@ -37,6 +37,8 @@ var limiter = core.RateLimiter{
 // @license.name GNU General Public License v3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
 func main() {
+	gin.SetMode(state.CurrentArgs.Environment)
+	
 	router := gin.New()
 
 	logger := slog.New(slog.NewJSONHandler(
