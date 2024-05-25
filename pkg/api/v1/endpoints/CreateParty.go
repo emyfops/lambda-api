@@ -29,8 +29,11 @@ var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
 	var settings request.Settings
-
 	if err := ctx.Bind(&settings); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Validation error",
+			"errors":  err.Error(),
+		})
 		return
 	}
 

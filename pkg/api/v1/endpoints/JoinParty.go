@@ -21,8 +21,11 @@ import (
 // @Security Bearer
 func JoinParty(ctx *gin.Context) {
 	var join request.JoinParty
-
 	if err := ctx.Bind(&join); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Validation error",
+			"errors":  err.Error(),
+		})
 		return
 	}
 

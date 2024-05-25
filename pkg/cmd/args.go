@@ -1,19 +1,28 @@
 package cmd
 
-import "net/netip"
+import (
+	"log/slog"
+)
 
 type Args struct {
-	Host netip.Addr `arg:"-h,--host" help:"Host address, supports v4 and v6" default:"127.0.0.1"`
-	Port int        `arg:"-p,--port" help:"Port number" default:"8080"`
+	Port int `arg:"-p,--port" help:"Port number" default:"8080"`
 
-	Verbose string `arg:"-v,--verbose" help:"Log level" default:"info" placeholder:"INFO | DEBUG | WARN | ERROR"`
+	Verbose    slog.Level `arg:"-v,--verbose" help:"Log level" default:"INFO" placeholder:"INFO | DEBUG | WARN | ERROR"`
+	PrettyJson bool       `arg:"--pretty-json" help:"Return pretty JSON responses (CPU intensive)" default:"false"`
 
 	AllowInsecure bool `arg:"--allow-insecure" help:"Allow insecure minecraft accounts to connect" default:"false"`
+
+	RateLimit  int   `arg:"--rate-limit" help:"Rate limit per second" default:"5"`
+	RateBurst  int   `arg:"--rate-burst" help:"Rate burst" default:"10"`
+	RatePunish int64 `arg:"--rate-punish" help:"Rate punish duration" default:"10"`
 }
 
 var DefaultArgs = &Args{
-	Host:          netip.MustParseAddr("127.0.0.1"),
 	Port:          8080,
-	Verbose:       "info",
+	Verbose:       slog.LevelInfo,
+	PrettyJson:    false,
 	AllowInsecure: false,
+	RateLimit:     5,
+	RateBurst:     10,
+	RatePunish:    10,
 }

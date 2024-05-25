@@ -22,6 +22,10 @@ import (
 func Login(ctx *gin.Context) {
 	var login request.Authentication
 	if err := ctx.Bind(&login); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Validation error",
+			"errors":  err.Error(),
+		})
 		return
 	}
 

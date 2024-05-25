@@ -9,9 +9,9 @@ import (
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
 	"github.com/khaaleoo/gin-rate-limiter/core"
-	sloggin "github.com/samber/slog-gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 	"log/slog"
 	"os"
 	"time"
@@ -22,9 +22,9 @@ var limiter = core.RateLimiter{
 	RateLimiterType: core.IPRateLimiter,
 	Key:             "iplimiter_maximum_requests_for_ip",
 	Option: core.RateLimiterOption{
-		Limit: 2,                // Maximum number of requests allowed per second
-		Burst: 5,                // Maximum number of requests allowed to burst
-		Len:   10 * time.Second, // Time window
+		Limit: rate.Limit(state.CurrentArgs.RateLimit),
+		Burst: state.CurrentArgs.RateBurst,
+		Len:   time.Duration(state.CurrentArgs.RatePunish) * time.Second,
 	},
 }
 
@@ -41,14 +41,17 @@ func main() {
 
 	logger := slog.New(slog.NewJSONHandler(
 		os.Stdout,
-		nil),
+		&slog.HandlerOptions{
+			Level: state.CurrentArgs.Verbose,
+		}),
 	)
-	router.Use(sloggin.New(logger), gin.Recovery())
+
+	router.Use(gin.Recovery())
 	router.Use(core.RequireRateLimiter(limiter))
 
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
-	v1.Register(router) // Register the v1 API
+	v1.Register(router, logger)
 
 	_ = router.Run(":8080")
 }
