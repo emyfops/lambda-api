@@ -30,7 +30,7 @@ type Player struct {
 }
 
 func (pl *Player) String() string {
-	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s}", pl.Name, pl.UUID, pl.DiscordID)
+	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s, Unsafe: %t}", pl.Name, pl.UUID, pl.DiscordID, pl.Unsafe)
 }
 
 // Because both the Minecraft and Discord API return the same structure,
