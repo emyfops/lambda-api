@@ -3,12 +3,16 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
 	"github.com/khaaleoo/gin-rate-limiter/core"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
@@ -38,8 +42,9 @@ var limiter = core.RateLimiter{
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
 func main() {
 	gin.SetMode(state.CurrentArgs.Environment)
-	
+
 	router := gin.New()
+	__prometheus(router)
 
 	logger := slog.New(slog.NewJSONHandler(
 		os.Stdout,
@@ -55,5 +60,15 @@ func main() {
 
 	v1.Register(router, logger)
 
-	_ = router.Run(":8080")
+	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
+}
+
+func __prometheus(router *gin.Engine) {
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(collectors.NewGoCollector())
+	reg.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+	reg.MustRegister(collectors.NewBuildInfoCollector())
+
+	// TODO: Should I protected this endpoint ?
+	router.GET("/metrics", gin.WrapH(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
 }

@@ -20,7 +20,7 @@ func Register(router *gin.Engine, logger *slog.Logger) {
 	v1 := router.Group("/api/v1")
 	v1.Use(sloggin.New(logger.With("module", "api/v1")))
 
-	v1.GET("/login", endpoints.Login)
+	v1.POST("/login", endpoints.Login)
 	v1.POST("/party/create", middlewares.CheckAuth, endpoints.CreateParty)
 	v1.PUT("/party/join", middlewares.CheckAuth, endpoints.JoinParty)
 	v1.PATCH("/party/edit", middlewares.CheckAuth, endpoints.EditParty)
