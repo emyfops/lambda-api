@@ -8,14 +8,12 @@ import (
 	"log/slog"
 )
 
-//
 // @BasePath /api/v1
 //
 // @SecurityDefinitions.Apikey Bearer
 // @In header
 // @Name Authorization
 // @Description Type "Bearer" followed by a space and JWT token.
-
 func Register(router *gin.Engine, logger *slog.Logger) {
 	v1 := router.Group("/api/v1")
 	v1.Use(sloggin.New(logger.With("module", "api/v1")))

@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
+	"github.com/Edouard127/lambda-rpc/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
 	"github.com/khaaleoo/gin-rate-limiter/core"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -41,11 +40,10 @@ var limiter = core.RateLimiter{
 // @license.name GNU General Public License v3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
 func main() {
+	// Set the environment
 	gin.SetMode(state.CurrentArgs.Environment)
 
-	router := gin.New()
-	__prometheus(router)
-
+	// Create a new logger
 	logger := slog.New(slog.NewJSONHandler(
 		os.Stdout,
 		&slog.HandlerOptions{
@@ -53,22 +51,33 @@ func main() {
 		}),
 	)
 
-	router.Use(gin.Recovery())
-	router.Use(core.RequireRateLimiter(limiter))
+	// Create a new router
+	router := gin.New()
 
+	// Setup metrics
+	metrics(router)
+
+	// Setup healthz check
+	// TODO: Implement healthz check
+
+	// Apply rate limiter
+	router.Use(gin.Recovery(), core.RequireRateLimiter(limiter))
+
+	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
+	// Register the APIs
 	v1.Register(router, logger)
+	// v2.Register(router, logger)
+	// ...
 
 	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
+
+	// FixMe: We're preventing the go scheduler from gracefully exiting the program
+	// because of parallel goroutines for the healthz check and the main router
 }
 
-func __prometheus(router *gin.Engine) {
-	reg := prometheus.NewRegistry()
-	reg.MustRegister(collectors.NewGoCollector())
-	reg.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-	reg.MustRegister(collectors.NewBuildInfoCollector())
-
-	// TODO: Should I protected this endpoint ?
-	router.GET("/metrics", gin.WrapH(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
+func metrics(router *gin.Engine) {
+	router.Use(middlewares.PrometheusMiddleware())
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
