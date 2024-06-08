@@ -2,7 +2,7 @@ package endpoints
 
 import (
 	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/internal/app/io"
+	"github.com/Edouard127/lambda-rpc/internal/app/memory"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
@@ -10,11 +10,11 @@ import (
 )
 
 // Player -> &Party ID
-var playerMap = io.NewCache[response.Player, string]()
+var playerMap = memory.NewCache[response.Player, string]()
 
 // Reverse mapping of playerMap
 // &Party ID -> &Party
-var partyMap = io.NewCache[string, *response.Party]()
+var partyMap = memory.NewCache[string, *response.Party]()
 
 // CreateParty godoc
 // @BasePath /api/v1
