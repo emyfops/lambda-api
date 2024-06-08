@@ -57,10 +57,7 @@ func main() {
 	// Setup metrics
 	metrics(router)
 
-	// Setup healthz check
-	// TODO: Implement healthz check
-
-	// Apply rate limiter
+	// Apply rate limiter after prometheus
 	router.Use(gin.Recovery(), core.RequireRateLimiter(limiter))
 
 	// Provide swagger documentation
@@ -72,9 +69,6 @@ func main() {
 	// ...
 
 	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
-
-	// FixMe: We're preventing the go scheduler from gracefully exiting the program
-	// because of parallel goroutines for the healthz check and the main router
 }
 
 func metrics(router *gin.Engine) {
