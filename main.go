@@ -20,17 +20,6 @@ import (
 	"time"
 )
 
-var _ = arg.MustParse(&state.CurrentArgs)
-var limiter = core.RateLimiter{
-	RateLimiterType: core.IPRateLimiter,
-	Key:             "iplimiter_maximum_requests_for_ip",
-	Option: core.RateLimiterOption{
-		Limit: rate.Limit(state.CurrentArgs.RateLimit),
-		Burst: state.CurrentArgs.RateBurst,
-		Len:   time.Duration(state.CurrentArgs.RatePunish) * time.Second,
-	},
-}
-
 // @Title Lambda RPC API
 // @Version 1.0
 // @Description This is the API for the Lambda Discord RPC handler
@@ -55,10 +44,19 @@ func main() {
 	router := gin.New()
 
 	// Setup metrics
-	metrics(router)
+	router.Use(middlewares.PrometheusMiddleware())
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Apply rate limiter after prometheus
-	router.Use(gin.Recovery(), core.RequireRateLimiter(limiter))
+	router.Use(gin.Recovery(), core.RequireRateLimiter(core.RateLimiter{
+		RateLimiterType: core.IPRateLimiter,
+		Key:             "iplimiter_maximum_requests_for_ip",
+		Option: core.RateLimiterOption{
+			Limit: rate.Limit(state.CurrentArgs.RateLimit),
+			Burst: state.CurrentArgs.RateBurst,
+			Len:   time.Duration(state.CurrentArgs.RatePunish) * time.Second,
+		},
+	}))
 
 	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
@@ -71,7 +69,6 @@ func main() {
 	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
 }
 
-func metrics(router *gin.Engine) {
-	router.Use(middlewares.PrometheusMiddleware())
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+func init() {
+	arg.MustParse(&state.CurrentArgs)
 }
