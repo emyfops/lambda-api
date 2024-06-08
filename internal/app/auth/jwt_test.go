@@ -1,28 +1,29 @@
 package auth
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestNewJwt(t *testing.T) {
-	t.Run("TestNewJwt", func(t *testing.T) {
-		type test struct {
-			Info string `json:"info"`
-		}
+	type test struct {
+		Info string `json:"info"`
+	}
 
-		signed, err := CreateJwtToken(&test{Info: "aaa"})
-		if err != nil {
-			t.Error(err)
-		}
+	signed, err := CreateJwtToken(&test{Info: "aaa"})
+	if err != nil {
+		t.Error(err)
+	}
 
-		token, err := ParseJwtToken(signed)
-		if err != nil {
-			t.Error(err)
-		}
+	token, err := ParseJwtToken(signed)
+	if err != nil {
+		t.Error(err)
+	}
 
-		var result test
-		ParseToStruct(token, &result)
-		fmt.Println(result)
-	})
+	var result test
+	ParseToStruct(token, &result)
+	if result.Info != "aaa" {
+		t.Errorf("expected 'aaa', got %s", result.Info)
+	}
+
+	t.Log("TestNewJwt passed")
 }

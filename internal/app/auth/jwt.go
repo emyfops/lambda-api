@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -21,17 +20,17 @@ var pubKeyBuffer bytes.Buffer
 
 func init() {
 	var err error
-
+	
 	privKey, err = rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		panic(fmt.Sprintf("failed to generate key: %s\n", err))
+		panic("failed to generate private key: " + err.Error())
 	}
 
 	pubKey = &privKey.PublicKey
 
 	pubKeyBytes, err = x509.MarshalPKIXPublicKey(pubKey)
 	if err != nil {
-		panic(fmt.Sprintf("failed to marshal public key: %s\n", err))
+		panic("failed to marshal public key: " + err.Error())
 	}
 
 	pubKeyBlock = &pem.Block{
@@ -39,8 +38,8 @@ func init() {
 		Bytes: pubKeyBytes,
 	}
 
-	if err := pem.Encode(&pubKeyBuffer, pubKeyBlock); err != nil {
-		panic(fmt.Sprintf("failed to encode public key: %s\n", err))
+	if err = pem.Encode(&pubKeyBuffer, pubKeyBlock); err != nil {
+		panic("failed to encode public key: " + err.Error())
 	}
 }
 
@@ -55,7 +54,7 @@ func CreateJwtToken(claims any) (signed string, err error) {
 
 	signed, err = token.SignedString(privKey)
 	if err != nil {
-		err = fmt.Errorf("failed to sign token: %s\n", err)
+		err = errors.New("failed to sign token: " + err.Error())
 		return
 	}
 
@@ -66,14 +65,12 @@ func CreateJwtToken(claims any) (signed string, err error) {
 func ParseJwtToken(signed string) (token *jwt.Token, err error) {
 	pubKey, err := x509.ParsePKIXPublicKey(pubKeyBlock.Bytes)
 	if err != nil {
-		return token, fmt.Errorf("failed to parse public key: %s\n", err)
+		return token, errors.New("failed to parse public key: " + err.Error())
 	}
 
-	token, err = jwt.Parse(signed, func(token *jwt.Token) (any, error) {
-		return pubKey, nil
-	})
+	token, err = jwt.Parse(signed, func(token *jwt.Token) (any, error) { return pubKey, nil })
 	if err != nil {
-		return token, fmt.Errorf("failed to parse token: %s\n", err)
+		return token, errors.New("failed to parse token: " + err.Error())
 	}
 
 	return token, nil
@@ -87,11 +84,11 @@ func ParseToStruct[T any](token *jwt.Token, result *T) error {
 
 	dataBytes, err := json.Marshal(parsed)
 	if err != nil {
-		return fmt.Errorf("error marshalling data field: %v", err)
+		return errors.New("error marshalling data field:" + err.Error())
 	}
 
-	if err := json.Unmarshal(dataBytes, result); err != nil {
-		return fmt.Errorf("error unmarshalling data field into provided struct: %v", err)
+	if err = json.Unmarshal(dataBytes, result); err != nil {
+		return errors.New("error unmarshalling data field into provided struct: " + err.Error())
 	}
 
 	return nil
