@@ -8,8 +8,9 @@ import (
 	"log/slog"
 )
 
+// Register godoc
 // @BasePath /api/v1
-//
+// @Summary Register the API v1 routes
 // @SecurityDefinitions.Apikey Bearer
 // @In header
 // @Name Authorization
@@ -22,4 +23,7 @@ func Register(router *gin.Engine, logger *slog.Logger) {
 	v1.POST("/party/create", middlewares.CheckAuth, endpoints.CreateParty)
 	v1.PUT("/party/join", middlewares.CheckAuth, endpoints.JoinParty)
 	v1.PATCH("/party/edit", middlewares.CheckAuth, endpoints.EditParty)
+	v1.PUT("/party/leave", middlewares.CheckAuth, endpoints.LeaveParty)
+	v1.DELETE("/party/delete", middlewares.CheckAuth, endpoints.DeleteParty)
+	v1.GET("/party", middlewares.CheckAuth, endpoints.GetParty)
 }

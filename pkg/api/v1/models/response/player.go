@@ -53,7 +53,6 @@ func GetPlayer(token, name, hash string) (pl Player, err error) {
 	}
 
 	err = GetDiscord(token, &pl)
-
 	return
 }
 
