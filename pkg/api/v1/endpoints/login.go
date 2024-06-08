@@ -13,7 +13,7 @@ import (
 // @BasePath /api/v1
 // @Summary Login to the server
 // @Description Login to the server using a Discord identify token, a Minecraft username and a Mojang session hash
-// @Tags Party
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param login body request.Authentication true "Authentication"

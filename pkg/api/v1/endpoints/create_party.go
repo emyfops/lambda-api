@@ -19,12 +19,12 @@ var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
 // CreateParty godoc
 // @BasePath /api/v1
 // @Summary Create a new party
-// @Description Create a new party
 // @Tags Party
 // @Accept json
 // @Produce json
 // @Param Settings body request.Settings false "Settings"
 // @Success 201 {object} response.Party
+// @Failure 409 {object} response.Error
 // @Router /party/create [post]
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
@@ -39,18 +39,17 @@ func CreateParty(ctx *gin.Context) {
 
 	player := auth.GinMustGet[response.Player](ctx, "player")
 
-	// Check if the player is already in a party
-	if partyID, exists := playerMap.Get(player); exists {
-		party, _ := partyMap.Get(partyID)
-
-		// As long as the party is not deleted, we can return it
-		ctx.AbortWithStatusJSON(http.StatusOK, party)
+	_, exists := playerMap.Get(player)
+	if exists {
+		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
+			"message": "You are already in a party",
+		})
 	}
 
 	party := response.NewWithSettings(player, &settings)
 
 	partyMap.Set(party.ID, party)
-	playerMap.Set(player, party.ID) // Reverse mapping
+	playerMap.Set(player, party.ID)
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 	return

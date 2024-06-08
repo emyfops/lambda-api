@@ -11,7 +11,6 @@ import (
 // JoinParty godoc
 // @BasePath /api/v1
 // @Summary Join a party
-// @Description Join a party
 // @Tags Party
 // @Accept json
 // @Produce json

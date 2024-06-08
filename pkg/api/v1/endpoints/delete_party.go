@@ -10,7 +10,6 @@ import (
 // DeleteParty godoc
 // @BasePath /api/v1
 // @Summary Delete an existing party
-// @Description Delete an existing party
 // @Tags Party
 // @Accept json
 // @Produce json

@@ -11,7 +11,6 @@ import (
 // EditParty godoc
 // @BasePath /api/v1
 // @Summary Edit a party
-// @Description Edit a party
 // @Tags Party
 // @Accept json
 // @Produce json
