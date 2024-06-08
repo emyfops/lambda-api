@@ -9,12 +9,12 @@ import (
 	"net/http"
 )
 
-// Persistent memory map to store the parties
-// Party ID -> Party
-var partyMap = io.NewPersistentMemoryCache[string, *response.Party](0)
+// Player -> &Party ID
+var playerMap = io.NewCache[response.Player, string]()
 
-// Player -> Party ID
-var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
+// Reverse mapping of playerMap
+// &Party ID -> &Party
+var partyMap = io.NewCache[string, *response.Party]()
 
 // CreateParty godoc
 // @BasePath /api/v1
@@ -49,8 +49,8 @@ func CreateParty(ctx *gin.Context) {
 
 	party := response.NewWithSettings(player, &settings)
 
-	partyMap.Set(party.ID, party)
-	playerMap.Set(player, party.ID)
+	partyMap.Set(party.ID, party, -1)
+	playerMap.Set(player, party.ID, -1)
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 }

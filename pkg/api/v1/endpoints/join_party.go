@@ -39,7 +39,7 @@ func JoinParty(ctx *gin.Context) {
 		})
 	}
 
-	party.Add(player)
+	(*party).Add(player)
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
 }

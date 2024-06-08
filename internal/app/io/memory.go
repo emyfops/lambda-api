@@ -1,123 +1,97 @@
 package io
 
 import (
-	"context"
 	"sync"
 	"time"
 )
 
-// MemoryCache is an in-memory cache implementation.
-type MemoryCache[T comparable, K any] struct {
-	mu           sync.RWMutex    // Mutex for concurrent access
-	persistent   bool            // Indicates if the cache is persistent
-	data         map[T]K         // Cache data
-	queue        map[T]time.Time // Tracks expiration time for cache entries
-	timeoutEat   time.Duration   // Timeout duration for cache entries
-	accumulation time.Duration   // Accumulation duration for cache entries
-	ctx          context.Context // Context for the cache
+type item[K any] struct {
+	value K
+	exp   int64
+}
+
+func (i *item[K]) Expired() bool {
+	return time.Now().UnixNano() > i.exp && i.exp != -1
+}
+
+// Cache is an in-memory cache implementation.
+type Cache[T comparable, K any] struct {
+	items     map[T]item[K] // Cache data
+	mu        sync.RWMutex  // Mutex for concurrent access
+	onEvicted func(T, K)    // Callback function when an item is evicted
 }
 
 const (
-	eatInterval         = time.Millisecond * 1000
-	defaultQueueSize    = 0
-	defaultAccumulation = time.Millisecond * 1000
+	NoExpiration time.Duration = -1
 )
 
-// NewPersistentMemoryCache creates a new persistent memory cache.
-// The size parameter specifies the maximum number of entries that can be stored in the cache.
-// To get a growable cache, set the size to 0.
-func NewPersistentMemoryCache[T comparable, K any](size int64) *MemoryCache[T, K] {
-	if size < 0 {
-		size = defaultQueueSize
+// NewCache creates a new persistent memory cache.
+func NewCache[T comparable, K any]() *Cache[T, K] {
+	return &Cache[T, K]{
+		items: make(map[T]item[K]),
 	}
-
-	c := &MemoryCache[T, K]{
-		persistent: true,
-		data:       make(map[T]K, size),
-		ctx:        context.Background(),
-	}
-
-	return c
 }
 
-// NewTempMemoryCache creates a new temporary memory cache.
-// The timeout parameter specifies the duration after which a cache entry is considered expired.
-// The size parameter specifies the maximum number of entries that can be stored in the cache.
-// To get a growable cache, set the size to 0.
-// The accumulation parameter specifies the duration added to the expiration time of a cache entry each time it is accessed.
-func NewTempMemoryCache[T comparable, K any](timeout time.Duration, accumulation time.Duration, size int64) *MemoryCache[T, K] {
-	if size < 0 {
-		size = defaultQueueSize
-	}
-
-	if accumulation < 0 {
-		accumulation = defaultAccumulation
-	}
-
-	c := &MemoryCache[T, K]{
-		data:         make(map[T]K, size),
-		queue:        make(map[T]time.Time, size),
-		timeoutEat:   timeout,
-		accumulation: accumulation,
-		ctx:          context.Background(),
-	}
-
-	if !c.persistent {
-		go Ticker(c.ctx, eatInterval, false, c.devour)
-	}
-	return c
+func (c *Cache[T, K]) OnEvicted(f func(T, K)) {
+	c.mu.Lock()
+	c.onEvicted = f
+	c.mu.Unlock()
 }
 
 // Get retrieves a value from the cache associated with the given key.
-func (c *MemoryCache[T, K]) Get(key T) (K, bool) {
+func (c *Cache[T, K]) Get(key T) (*K, bool) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
 
-	value, ok := c.data[key]
-	if ok && !c.persistent {
-		c.queue[key] = c.queue[key].Add(c.accumulation)
+	item, found := c.items[key]
+	if !found {
+		c.mu.RUnlock()
+		return nil, false
 	}
-	return value, ok
+
+	if item.Expired() {
+		c.mu.RUnlock()
+		c.Delete(key)
+		return nil, false // We can't return the pointer because the item is deleted
+	}
+
+	c.mu.RUnlock()
+	return &item.value, true
 }
 
 // Set sets a value in the cache with the given key.
-func (c *MemoryCache[T, K]) Set(key T, value K) {
+func (c *Cache[T, K]) Set(key T, value K, exp time.Duration) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
 
-	c.data[key] = value
-	if !c.persistent {
-		c.queue[key] = time.Now().Add(c.timeoutEat)
+	if exp > 0 {
+		c.items[key] = item[K]{
+			value: value,
+			exp:   time.Now().Add(exp).UnixNano(),
+		}
+	} else {
+		c.items[key] = item[K]{
+			value: value,
+			exp:   int64(NoExpiration),
+		}
 	}
+
+	c.mu.Unlock()
 }
 
 // Delete removes a value from the cache associated with the given key.
-func (c *MemoryCache[T, K]) Delete(key T) {
+func (c *Cache[T, K]) Delete(key T) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
 
-	delete(c.data, key)
-	delete(c.queue, key)
-}
-
-// Close stops the cache and clears its data.
-func (c *MemoryCache[T, K]) Close() {
-	c.ctx.Done()
-
-	// Will be eaten by the GC when the goroutine exit
-	c.data = nil
-	c.queue = nil
-}
-
-// devour removes expired cache entries.
-func (c *MemoryCache[T, K]) devour() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	now := time.Now()
-	for key := range c.queue {
-		if c.queue[key].After(now) {
-			c.Delete(key)
-		}
+	if c.onEvicted != nil {
+		c.onEvicted(key, c.items[key].value)
 	}
+
+	delete(c.items, key)
+	c.mu.Unlock()
+}
+
+// Clear removes all values from the cache.
+func (c *Cache[T, K]) Clear() {
+	c.mu.Lock()
+	c.items = make(map[T]item[K])
+	c.mu.Unlock()
 }

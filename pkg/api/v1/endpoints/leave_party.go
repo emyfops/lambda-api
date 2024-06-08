@@ -27,7 +27,7 @@ func LeaveParty(ctx *gin.Context) {
 		})
 	}
 
-	partyMap.Delete(id)
+	partyMap.Delete(*id)
 	playerMap.Delete(player)
 
 	ctx.AbortWithStatus(http.StatusAccepted)

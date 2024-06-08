@@ -27,7 +27,7 @@ func GetParty(ctx *gin.Context) {
 		})
 	}
 
-	party, exists := partyMap.Get(id)
+	party, exists := partyMap.Get(*id)
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",

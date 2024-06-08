@@ -40,21 +40,21 @@ func EditParty(ctx *gin.Context) {
 		})
 	}
 
-	party, exists := partyMap.Get(partyID)
+	party, exists := partyMap.Get(*partyID)
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
 	}
 
-	if party.Leader != player {
+	if (*party).Leader != player {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
 			Message: "You are not the leader of the party",
 		})
 		return
 	}
 
-	party.Settings = settings
+	(*party).Settings = settings
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
 }

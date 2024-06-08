@@ -28,21 +28,21 @@ func DeleteParty(ctx *gin.Context) {
 		})
 	}
 
-	party, exists := partyMap.Get(partyID)
+	party, exists := partyMap.Get(*partyID)
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
 	}
 
-	if party.Leader != player {
+	if (*party).Leader != player {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
 			Message: "You are not the leader of the party",
 		})
 		return
 	}
 
-	partyMap.Delete(partyID)
+	partyMap.Delete(*partyID)
 	playerMap.Delete(player)
 
 	ctx.AbortWithStatus(http.StatusNoContent)
