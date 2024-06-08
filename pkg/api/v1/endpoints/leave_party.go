@@ -13,6 +13,8 @@ import (
 // @Tags Party
 // @Accept json
 // @Produce json
+// @Success 202
+// @Failure 404 {object} response.Error
 // @Router /party/leave [put]
 // @Security Bearer
 func LeaveParty(ctx *gin.Context) {
@@ -20,14 +22,13 @@ func LeaveParty(ctx *gin.Context) {
 
 	id, exists := playerMap.Get(player)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Player not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "You are not in a party",
 		})
 	}
 
 	partyMap.Delete(id)
 	playerMap.Delete(player)
 
-	ctx.AbortWithStatusJSON(http.StatusAccepted, nil)
-	return
+	ctx.AbortWithStatus(http.StatusAccepted)
 }

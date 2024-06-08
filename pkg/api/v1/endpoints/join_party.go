@@ -16,14 +16,16 @@ import (
 // @Produce json
 // @Param ID body string true "Party ID"
 // @Success 202 {object} response.Party
+// @Failure 400 {object} response.ValidationError
+// @Failure 404 {object} response.Error
 // @Router /party/join [put]
 // @Security Bearer
 func JoinParty(ctx *gin.Context) {
 	var join request.JoinParty
 	if err := ctx.Bind(&join); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Validation error",
-			"errors":  err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
 		})
 		return
 	}
@@ -32,13 +34,12 @@ func JoinParty(ctx *gin.Context) {
 
 	party, exists := partyMap.Get(join.ID)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Party not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "The party does not exist",
 		})
 	}
 
 	party.Add(player)
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
-	return
 }

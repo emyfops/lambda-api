@@ -14,6 +14,8 @@ import (
 // @Accept json
 // @Produce json
 // @Success 204
+// @Failure 403 {object} response.Error
+// @Failure 404 {object} response.Error
 // @Router /party/delete [delete]
 // @Security Bearer
 func DeleteParty(ctx *gin.Context) {
@@ -21,21 +23,21 @@ func DeleteParty(ctx *gin.Context) {
 
 	partyID, exists := playerMap.Get(player)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "You are not in a party",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "You are not in a party",
 		})
 	}
 
 	party, exists := partyMap.Get(partyID)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Party not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "The party does not exist",
 		})
 	}
 
 	if party.Leader != player {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-			"message": "You are not the leader of the party",
+		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
+			Message: "You are not the leader of the party",
 		})
 		return
 	}

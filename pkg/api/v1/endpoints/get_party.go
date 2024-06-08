@@ -14,6 +14,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.Party
+// @Failure 404 {object} response.Error
 // @Router /party [get]
 // @Security Bearer
 func GetParty(ctx *gin.Context) {
@@ -21,15 +22,15 @@ func GetParty(ctx *gin.Context) {
 
 	id, exists := playerMap.Get(player)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Player not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "You are not in a party",
 		})
 	}
 
 	party, exists := partyMap.Get(id)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Party not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "The party does not exist",
 		})
 	}
 

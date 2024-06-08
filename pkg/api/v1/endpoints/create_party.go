@@ -24,15 +24,16 @@ var playerMap = io.NewPersistentMemoryCache[response.Player, string](0)
 // @Produce json
 // @Param Settings body request.Settings false "Settings"
 // @Success 201 {object} response.Party
+// @Failure 400 {object} response.ValidationError
 // @Failure 409 {object} response.Error
 // @Router /party/create [post]
 // @Security Bearer
 func CreateParty(ctx *gin.Context) {
 	var settings request.Settings
 	if err := ctx.Bind(&settings); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Validation error",
-			"errors":  err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
 		})
 		return
 	}
@@ -41,8 +42,8 @@ func CreateParty(ctx *gin.Context) {
 
 	_, exists := playerMap.Get(player)
 	if exists {
-		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
-			"message": "You are already in a party",
+		ctx.AbortWithStatusJSON(http.StatusConflict, response.Error{
+			Message: "You are already in a party",
 		})
 	}
 
@@ -52,5 +53,4 @@ func CreateParty(ctx *gin.Context) {
 	playerMap.Set(player, party.ID)
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
-	return
 }

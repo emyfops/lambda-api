@@ -16,14 +16,17 @@ import (
 // @Produce json
 // @Param Settings body request.Settings false "Settings"
 // @Success 202 {object} response.Party
+// @Failure 400 {object} response.Error
+// @Failure 403 {object} response.ValidationError
+// @Failure 404 {object} response.Error
 // @Router /party/edit [patch]
 // @Security Bearer
 func EditParty(ctx *gin.Context) {
 	var settings request.Settings
 	if err := ctx.Bind(&settings); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Validation error",
-			"errors":  err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
 		})
 		return
 	}
@@ -32,29 +35,26 @@ func EditParty(ctx *gin.Context) {
 
 	partyID, exists := playerMap.Get(player)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "You are not in a party",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "You are not in a party",
 		})
 	}
 
 	party, exists := partyMap.Get(partyID)
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Party not found",
+		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
+			Message: "The party does not exist",
 		})
 	}
 
 	if party.Leader != player {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-			"message": "You are not the leader of the party",
+		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
+			Message: "You are not the leader of the party",
 		})
 		return
 	}
 
 	party.Settings = settings
 
-	// TODO: Find a way to notify the party members that the settings have changed
-
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
-	return
 }

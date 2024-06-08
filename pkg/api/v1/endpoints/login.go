@@ -18,29 +18,32 @@ import (
 // @Produce json
 // @Param login body request.Authentication true "Authentication"
 // @Success 200 {object} response.Authentication
+// @Failure 400 {object} response.ValidationError
+// @Failure 401 {object} response.Error
+// @Failure 500 {object} response.Error
 // @Router /party/login [post]
 func Login(ctx *gin.Context) {
 	var login request.Authentication
 	if err := ctx.Bind(&login); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Validation error",
-			"errors":  err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
 		})
 		return
 	}
 
 	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid discord account or the hash has expired, please reconnect to the server",
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
+			Message: "Invalid credentials",
 		})
 		return
 	}
 
 	signed, err := auth.CreateJwtToken(player)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "An error occurred while signing the token",
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
+			Message: "Failed to create token",
 		})
 	}
 
