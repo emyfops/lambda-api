@@ -6,8 +6,20 @@ import (
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 )
+
+var (
+	partyCountTotal = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "lambda_rpc_party_count_total",
+		Help: "Total number of parties",
+	}, []string{"version"})
+)
+
+func init() {
+	prometheus.MustRegister(partyCountTotal)
+}
 
 // Player -> &Party ID
 var playerMap = memory.NewCache[response.Player, string]()
@@ -51,6 +63,8 @@ func CreateParty(ctx *gin.Context) {
 
 	partyMap.Set(party.ID, party, -1)
 	playerMap.Set(player, party.ID, -1)
+
+	partyCountTotal.WithLabelValues("v1").Inc()
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 }

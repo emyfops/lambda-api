@@ -2,11 +2,24 @@ package endpoints
 
 import (
 	"github.com/Edouard127/lambda-rpc/internal/app/auth"
+	"github.com/Edouard127/lambda-rpc/internal/app/memory"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 )
+
+var (
+	loggedInTotal = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "lambda_rpc_logged_in_users",
+		Help: "Total number of logged in users",
+	}, []string{"version"})
+)
+
+func init() {
+	prometheus.MustRegister(loggedInTotal)
+}
 
 // JoinParty godoc
 // @BasePath /api/v1
@@ -40,6 +53,8 @@ func JoinParty(ctx *gin.Context) {
 	}
 
 	(*party).Add(player)
+	playerMap.Set(player, join.ID, memory.NoExpiration)
+	loggedInTotal.WithLabelValues("v1").Inc()
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
 }
