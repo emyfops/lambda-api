@@ -23,6 +23,7 @@ func TestNewJwt(t *testing.T) {
 	ParseToStruct(token, &result)
 	if result.Info != "aaa" {
 		t.Errorf("expected 'aaa', got %s", result.Info)
+		return
 	}
 
 	t.Log("TestNewJwt passed")

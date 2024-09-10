@@ -1,35 +1,32 @@
 package random
 
 import (
+	"math/rand"
 	"testing"
 )
 
+func init() {
+	src = rand.NewSource(0)
+}
+
 func TestRandString(t *testing.T) {
-	t.Log(RandString(69))
-	t.Log(RandString(69))
-	t.Log(RandString(69))
-}
+	const (
+		first  = "lwDqHvrrrpHixIlOLIHafuuyunSEcEPIVngpTcYkBVsROQvIpxLpBSHZBbblhaJlRczqb"
+		second = "tdiZlIZDFmNRbELhbZmnJfzvVIETOlZmPXcXkYZfMATHBoiJJVSCzetWxHmTpNvRTdqjo"
+		third  = "VnXybyfsIHoPSZEGRhiigSGEcQgEpZdRQzAfpNUPHLYLTAnDHrtPTtYEYTxsPQzsIfUOm"
+	)
 
-func TestRandInt32(t *testing.T) {
-	t.Log(RandInt32())
-	t.Log(RandInt32())
-	t.Log(RandInt32())
-}
+	if ret := RandString(69); ret != first {
+		t.Errorf("expected %s, got %s", first, ret)
+	}
 
-func TestRandInt64(t *testing.T) {
-	t.Log(RandInt64())
-	t.Log(RandInt64())
-	t.Log(RandInt64())
-}
+	if ret := RandString(69); ret != second {
+		t.Errorf("expected %s, got %s", second, ret)
+	}
 
-func TestRandFloat(t *testing.T) {
-	t.Log(RandFloat())
-	t.Log(RandFloat())
-	t.Log(RandFloat())
-}
+	if ret := RandString(69); ret != third {
+		t.Errorf("expected %s, got %s", third, ret)
+	}
 
-func TestRandDouble(t *testing.T) {
-	t.Log(RandDouble())
-	t.Log(RandDouble())
-	t.Log(RandDouble())
+	t.Log("TestRandString passed")
 }
