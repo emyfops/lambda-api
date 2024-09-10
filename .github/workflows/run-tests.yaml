@@ -23,6 +23,11 @@ jobs:
           cache-dependency-path: |
             go.sum
             
+      - name: Install dependencies
+        run: |
+          go get -v -u github.com/swaggo/swag/cmd/swag
+          export PATH=$PATH:$HOME/go/bin
+            
       - name: Generate code
         run: go generate ./...
         
