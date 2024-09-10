@@ -4,12 +4,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/Edouard127/lambda-rpc/internal/app/healthz"
 	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
 	"github.com/Edouard127/lambda-rpc/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
+	"github.com/heptiolabs/healthcheck"
 	"github.com/khaaleoo/gin-rate-limiter/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -46,6 +48,15 @@ func main() {
 	// Setup metrics
 	router.Use(middlewares.PrometheusMiddleware())
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	// Setup health checks
+	health := healthcheck.NewHandler()
+	health.AddLivenessCheck("pause-the-world-timeout", healthcheck.GCMaxPauseCheck(500*time.Microsecond))
+	health.AddReadinessCheck("http-connection-mojang-session", healthz.HTTPGetCheck("sessionserver.mojang.com/session/minecraft/hasJoined", 100*time.Millisecond))
+	health.AddReadinessCheck("http-connection-discord", healthz.HTTPGetCheck("https://discord.com", 100*time.Millisecond))
+
+	router.GET("/livez", gin.WrapF(health.LiveEndpoint))
+	router.GET("/readyz", gin.WrapF(health.ReadyEndpoint))
 
 	// Apply rate limiter after prometheus
 	router.Use(gin.Recovery(), core.RequireRateLimiter(core.RateLimiter{

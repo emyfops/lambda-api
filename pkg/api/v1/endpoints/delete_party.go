@@ -44,7 +44,7 @@ func DeleteParty(ctx *gin.Context) {
 
 	partyMap.Delete(*partyID)
 	playerMap.Delete(player)
-	loggedInUsersGauge.WithLabelValues("v1").Dec()
+	loggedInTotal.WithLabelValues("v1").Dec()
 
 	ctx.AbortWithStatus(http.StatusNoContent)
 }
