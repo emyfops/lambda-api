@@ -13,7 +13,7 @@ type Args struct {
 
 	AllowInsecure bool `arg:"--allow-insecure" help:"Allow insecure minecraft accounts to connect" default:"false"`
 
-	RateLimit  int   `arg:"--rate-limit" help:"Rate limit per second" default:"5"`
-	RateBurst  int   `arg:"--rate-burst" help:"Rate burst" default:"10"`
-	RatePunish int64 `arg:"--rate-punish" help:"Rate punish duration" default:"10"`
+	RateLimit    int `arg:"--rate-limit" help:"Maximum number of requests allowed in the duration" default:"5"`
+	RateDuration int `arg:"--rate-duration" help:"Time frame in milliseconds in which requests can be made until n is reached" default:"10000"`
+	RateBurst    int `arg:"--rate-burst" help:"How many requests can be handled simultaneously from one IP" default:"2"`
 }

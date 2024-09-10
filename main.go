@@ -12,7 +12,6 @@ import (
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
 	"github.com/heptiolabs/healthcheck"
-	"github.com/khaaleoo/gin-rate-limiter/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -59,15 +58,12 @@ func main() {
 	router.GET("/readyz", gin.WrapF(health.ReadyEndpoint))
 
 	// Apply rate limiter after prometheus
-	router.Use(gin.Recovery(), core.RequireRateLimiter(core.RateLimiter{
-		RateLimiterType: core.IPRateLimiter,
-		Key:             "iplimiter_maximum_requests_for_ip",
-		Option: core.RateLimiterOption{
-			Limit: rate.Limit(state.CurrentArgs.RateLimit),
-			Burst: state.CurrentArgs.RateBurst,
-			Len:   time.Duration(state.CurrentArgs.RatePunish) * time.Second,
-		},
-	}))
+	router.Use(gin.Recovery(), middlewares.RateLimiter(
+		middlewares.Options{
+			Limit:    rate.Limit(state.CurrentArgs.RateLimit),
+			Duration: time.Duration(state.CurrentArgs.RateDuration) * time.Millisecond,
+			Burst:    state.CurrentArgs.RateBurst,
+		}))
 
 	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
