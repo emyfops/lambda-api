@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: lambda-rpc
-          image: lambda-rpc:latest
+          image: edouard127/lambda-rpc:latest
           ports:
             - containerPort: 8080
           resources:
