@@ -15,19 +15,17 @@ spec:
         app: lambda-rpc
     spec:
       containers:
-        - name: lambda-rpc-container
-          image: docker.kamigen.xyz/lambda-rpc:latest
+        - name: lambda-rpc
+          image: lambda-rpc:latest
           ports:
             - containerPort: 8080
           resources:
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
             requests:
-              memory: "64Mi"
-              cpu: "250m"
-      imagePullSecrets:
-      - name: regcrednexus # Example of how to use a secret
+              memory: 32Mi
+              cpu: 100m
+            limits:
+              memory: 64Mi
+              cpu: 200m
 ---
 apiVersion: v1
 kind: Service
@@ -36,7 +34,7 @@ metadata:
   labels:
     app: lambda-rpc
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 8080
@@ -44,22 +42,25 @@ spec:
   selector:
     app: lambda-rpc
 ---
-#
-# DO NOT USE THIS IF YOU DON'T HAVE A TRAEFIK INGRESS CONTROLLER
-#
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: lambda-rpc-ingress
+  namespace: public
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: >-
-        Host(`lambda-rpc.kamigen.xyz`) && PathPrefix(`/api/v1/`)
-      services:
-        - name: lambda-rpc-service
-          port: 80
+  ingressClassName: traefik
   tls:
-    certResolver: le
+    - hosts:
+        - lambda-client.org
+      secretName: cert-manager-certification-lambda-client
+  rules:
+    - host: rpc.lambda-client.org
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lambda-rpc-service
+                port:
+                  number: 80
