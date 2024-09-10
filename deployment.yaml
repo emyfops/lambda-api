@@ -57,7 +57,7 @@ spec:
     - host: rpc.lambda-client.org
       http:
         paths:
-          - path: /api
+          - path: /
             pathType: Prefix
             backend:
               service:
