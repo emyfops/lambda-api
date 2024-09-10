@@ -50,12 +50,11 @@ func main() {
 
 	// Setup health checks
 	health := healthcheck.NewHandler()
-	health.AddLivenessCheck("pause-the-world-timeout", healthcheck.GCMaxPauseCheck(500*time.Microsecond))
-	health.AddReadinessCheck("http-connection-mojang-session", healthz.HTTPGetCheck("sessionserver.mojang.com/session/minecraft/hasJoined", 100*time.Millisecond))
-	health.AddReadinessCheck("http-connection-discord", healthz.HTTPGetCheck("https://discord.com", 100*time.Millisecond))
+	health.AddLivenessCheck("pause-the-world-timeout", healthcheck.GCMaxPauseCheck(5000*time.Microsecond))
+	health.AddReadinessCheck("http-connection-mojang-session", healthz.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined", 100*time.Millisecond))
 
-	router.GET("/livez", gin.WrapF(health.LiveEndpoint))
-	router.GET("/readyz", gin.WrapF(health.ReadyEndpoint))
+	router.GET("/live", gin.WrapF(health.LiveEndpoint))
+	router.GET("/ready", gin.WrapF(health.ReadyEndpoint))
 
 	// Apply rate limiter after prometheus
 	router.Use(gin.Recovery(), middlewares.RateLimiter(
