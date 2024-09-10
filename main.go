@@ -56,6 +56,9 @@ func main() {
 	router.GET("/live", gin.WrapF(health.LiveEndpoint))
 	router.GET("/ready", gin.WrapF(health.ReadyEndpoint))
 
+	// Provide swagger documentation
+	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
+
 	// Apply rate limiter after prometheus
 	router.Use(gin.Recovery(), middlewares.RateLimiter(
 		middlewares.Options{
@@ -63,9 +66,6 @@ func main() {
 			Duration: time.Duration(state.CurrentArgs.RateDuration) * time.Millisecond,
 			Burst:    state.CurrentArgs.RateBurst,
 		}))
-
-	// Provide swagger documentation
-	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
 	// Register the APIs
 	v1.Register(router, logger)
