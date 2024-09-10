@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"github.com/Edouard127/lambda-rpc/internal/app/memory"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -40,8 +39,6 @@ func RateLimiter(options Options) gin.HandlerFunc {
 			// because other owners have the pointer to the pointer
 			instance, exists = cache.Get(ip)
 		}
-
-		fmt.Println((*instance).Limiter.Tokens())
 
 		if !(*instance).Limiter.Allow() ||
 			time.Duration((*instance).Limiter.Reserve().Delay()) > 0 {
