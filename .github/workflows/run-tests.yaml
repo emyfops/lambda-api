@@ -13,8 +13,9 @@ jobs:
   test:
       runs-on: ubuntu-latest
       steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+        
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -27,6 +28,9 @@ jobs:
         run: |
           go get -v -u github.com/swaggo/swag/cmd/swag
           go install github.com/swaggo/swag/cmd/swag
+          
+      - name: Test dir
+        run: ls .
             
       - name: Generate code
         run: go generate ./...
