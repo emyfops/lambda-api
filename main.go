@@ -43,6 +43,7 @@ func main() {
 
 	// Create a new router
 	router := gin.New()
+	router.SetTrustedProxies(nil)
 
 	// Setup metrics
 	router.Use(middlewares.PrometheusMiddleware())
