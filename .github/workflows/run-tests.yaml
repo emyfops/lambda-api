@@ -23,10 +23,10 @@ jobs:
           cache-dependency-path: |
             go.sum
             
-      - name: Install dependencies
+      - name: Install swagger
         run: |
           go get -v -u github.com/swaggo/swag/cmd/swag
-          export PATH=$(go env GOPATH)/bin:$PATH
+          go install github.com/swaggo/swag/cmd/swag
             
       - name: Generate code
         run: go generate ./...
