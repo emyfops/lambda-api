@@ -1,9 +1,11 @@
 name: Docker CI
 
 on:
-  push:
-    tags:
-      - '*' # Push events to matching tags
+  pull_request: 
+    types: 
+      - closed
+    branches:
+      - 'release/**'
         
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,6 +17,8 @@ env:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == 'true'
+    
     name: Build Lambda RPC
     runs-on: ubuntu-latest
     permissions:
@@ -38,29 +42,11 @@ jobs:
       - name: Upload Lambda RPC
         uses: actions/upload-artifact@v4.3.6
         with:
-          name: lambda-rpc-${{ steps.vars.outputs.COMMIT_HASH }}
+          name: lambda-rpc-${{ steps.all.outputs.modVersion }}+${{ steps.all.outputs.minecraftVersion }}-${{ env.COMMIT_HASH }}
           path: bin/main
-          
-      - name: Generate Changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@v4.1.1
-        with:
-          commitMode: true
-          configurationJson: |
-            {
-              "pr_template": "- #{{TITLE}} [#{{AUTHOR}}](#{{URL}})"
-            }
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2.0.8
-        with:
-          name: Lambda RPC ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: false
-          files: |
-            bin/main
-  docker:  
+  docker:
+    if: github.event.pull_request.merged == 'true'
+    
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +70,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ DOCKER_USERNAME }}
+          username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
           
       - name: Build and push
@@ -92,7 +78,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:{{ env.RELEASE_VERSION }}
+          tags: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.RELEASE_VERSION }}
           
       - name: Build and push (latest)
         uses: docker/build-push-action@v6
