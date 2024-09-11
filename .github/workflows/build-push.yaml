@@ -15,8 +15,6 @@ env:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == 'true'
-    
     name: Build Lambda RPC
     runs-on: ubuntu-latest
     permissions:
@@ -43,8 +41,6 @@ jobs:
           name: lambda-rpc-${{ steps.all.outputs.modVersion }}+${{ steps.all.outputs.minecraftVersion }}-${{ env.COMMIT_HASH }}
           path: bin/main
   docker:
-    if: github.event.pull_request.merged == 'true'
-    
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
