@@ -15,8 +15,8 @@ COPY . ./
 # Build the application
 RUN go build -o main .
 
-# Use the official Debian slim image for a lean production container.
-# https://hub.docker.com/_/debian
+# Use the official Alpine image for a lean production container
+# https://hub.docker.com/_/alpine
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 FROM alpine:3.20.3
 RUN set +x \
