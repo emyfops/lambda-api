@@ -17,6 +17,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 )
@@ -72,6 +73,9 @@ func main() {
 	v1.Register(router, logger)
 	// v2.Register(router, logger)
 	// ...
+
+	// Return OK for the root path (helm chart test)
+	router.GET("/", func(ctx *gin.Context) { ctx.String(http.StatusNoContent, "OK") })
 
 	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
 }
