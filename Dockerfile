@@ -18,7 +18,7 @@ RUN go build -o main .
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM debian:bookworm-slim
+FROM alpine:3.20.3
 RUN set +x \
     apt-get update \
     apt-get install -y ca-certificates \
