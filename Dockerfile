@@ -12,6 +12,14 @@ RUN go mod download
 # Copy the source code
 COPY . ./
 
+# Install swag
+RUN go get -v -u github.com/swaggo/swag/cmd/swag \
+    go install github.com/swaggo/swag/cmd/swag
+
+# Runs generators and linters
+RUN go generate ./...
+RUN go vet ./...
+
 # Build the application
 RUN go build -o main .
 
