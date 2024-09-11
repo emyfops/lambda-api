@@ -11,7 +11,31 @@ env:
   DOCKER_IMAGE: lambda-rpc
 
 jobs:
+  build:
+    name: Build Lambda RPC
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get Short Commit Hash
+        id: vars
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build Lambda RPC
+        run: go build -o bin/main .
+
+      - name: Upload Lambda RPC
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: lambda-rpc-${{ steps.all.outputs.modVersion }}+${{ steps.all.outputs.minecraftVersion }}-${{ env.COMMIT_HASH }}
+          path: bin/main
   docker:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
