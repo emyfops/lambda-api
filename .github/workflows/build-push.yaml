@@ -31,6 +31,9 @@ jobs:
         run: |
           go get -v -u github.com/swaggo/swag/cmd/swag
           go install github.com/swaggo/swag/cmd/swag
+          
+      - name: Generate code
+        run: go generate ./...
 
       - name: Build Lambda RPC
         run: go build -o bin/main .
