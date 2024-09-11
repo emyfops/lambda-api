@@ -1,11 +1,9 @@
 name: Docker CI
 
 on:
-  pull_request: 
-    types: 
-      - closed
-    branches:
-      - 'release/**'
+  push:
+    tags:
+      - '*'
         
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
