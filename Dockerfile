@@ -13,8 +13,8 @@ RUN go mod download
 COPY . ./
 
 # Install swag
-RUN go get -v -u github.com/swaggo/swag/cmd/swag \
-    go install github.com/swaggo/swag/cmd/swag
+RUN go get -v -u github.com/swaggo/swag/cmd/swag
+RUN go install github.com/swaggo/swag/cmd/swag
 
 # Runs generators and linters
 RUN go generate ./...
