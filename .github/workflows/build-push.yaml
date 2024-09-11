@@ -1,17 +1,67 @@
 name: Docker CI
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - 'release/**'
+    tags:
+      - '*' # Push events to matching tags
+        
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DOCKER_USERNAME: edouard127
   DOCKER_IMAGE: lambda-rpc
 
 jobs:
-  docker:
+  build:
+    name: Build Lambda RPC
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get Short Commit Hash
+        id: vars
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        
+      - name: Install swagger
+        run: |
+          go get -v -u github.com/swaggo/swag/cmd/swag
+          go install github.com/swaggo/swag/cmd/swag
+
+      - name: Build Lambda RPC
+        run: go build -o bin/main .
+
+      - name: Upload Lambda RPC
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: lambda-rpc-${{ steps.vars.outputs.COMMIT_HASH }}
+          path: bin/main
+          
+      - name: Generate Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4.1.1
+        with:
+          commitMode: true
+          configurationJson: |
+            {
+              "pr_template": "- #{{TITLE}} [#{{AUTHOR}}](#{{URL}})"
+            }
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          name: Lambda RPC ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: false
+          files: |
+            bin/main
+  docker:  
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
