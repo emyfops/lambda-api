@@ -2,7 +2,7 @@
 ### This is a template, modify before submitting your PR
 
 Please ensure that your PR title follows this format:
-- `[Latest release version] Feat, Fix, Ref`
+- `[Latest release version] Feat, Fix, Ref, Docs, ..., : Description`
 
 **Examples:**
 - `[1.0.0] Feat: Add new feature`
