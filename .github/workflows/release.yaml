@@ -28,9 +28,7 @@ jobs:
         with:
           name: Lambda RPC ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: false
-          generate_release_notes: true
+          
   docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
