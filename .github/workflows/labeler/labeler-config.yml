@@ -9,6 +9,9 @@ labels:
 
   - label: 'refactor'
     title: '(?i)\[?(refactor|ref)[:\]]'
+    
+  - label: 'critial'
+    title: '(?i)\[?(critical|urgent)[:\]]'
 
   - label: 'triage'
     title: '.*'
