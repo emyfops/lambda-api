@@ -1,0 +1,15 @@
+version: 1
+
+labels:
+  - label: 'bug'
+    title: '(?i)\[?bug[:\]]'
+
+  - label: 'feature'
+    title: '(?i)\[?(feature|feat)[:\]]'
+
+  - label: 'refactor'
+    title: '(?i)\[?(refactor|ref)[:\]]'
+
+  - label: 'triage'
+    title: '.*'
+    mergeable: false
