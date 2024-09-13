@@ -10,7 +10,6 @@ import (
 	"github.com/Edouard127/lambda-rpc/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/alexflint/go-arg"
-	"github.com/caarlos0/env"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -67,9 +66,5 @@ func main() {
 }
 
 func init() {
-	// First parse from command line args and then from the env file
 	arg.MustParse(&state.CurrentArgs)
-	env.Parse(&state.CurrentArgs) // Ignore errors
-
-	fmt.Println(state.CurrentArgs)
 }
