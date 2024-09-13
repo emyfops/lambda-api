@@ -15,11 +15,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"golang.org/x/time/rate"
 	"log/slog"
 	"net/http"
 	"os"
-	"time"
 )
 
 // @Title Lambda RPC API
@@ -53,13 +51,8 @@ func main() {
 	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
-	// Apply rate limiter after prometheus
-	router.Use(gin.Recovery(), middlewares.RateLimiter(
-		middlewares.Options{
-			Limit:    rate.Limit(state.CurrentArgs.RateLimit),
-			Duration: time.Duration(state.CurrentArgs.RateDuration) * time.Millisecond,
-			Burst:    state.CurrentArgs.RateBurst,
-		}))
+	// Prevent panics from crashing the server
+	router.Use(gin.Recovery())
 
 	// Register the APIs
 	global.Register(router, logger)
