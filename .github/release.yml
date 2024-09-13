@@ -1,0 +1,17 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: Security Fixes
+      labels:
+        - critical
+    - title: New Features
+      labels:
+        - feature
+    - title: Other Changes
+      labels:
+        - "*"
