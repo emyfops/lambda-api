@@ -4,14 +4,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/Edouard127/lambda-rpc/internal/app/healthz"
 	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
+	"github.com/Edouard127/lambda-rpc/pkg/api/global"
 	"github.com/Edouard127/lambda-rpc/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-rpc/pkg/api/v1"
 	"github.com/alexflint/go-arg"
 	"github.com/gin-gonic/gin"
-	"github.com/heptiolabs/healthcheck"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -50,14 +49,6 @@ func main() {
 	router.Use(middlewares.PrometheusMiddleware())
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	// Setup health checks
-	health := healthcheck.NewHandler()
-	health.AddLivenessCheck("pause-the-world-timeout", healthcheck.GCMaxPauseCheck(5000*time.Microsecond))
-	health.AddReadinessCheck("http-connection-mojang-session", healthz.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined", 100*time.Millisecond))
-
-	router.GET("/live", gin.WrapF(health.LiveEndpoint))
-	router.GET("/ready", gin.WrapF(health.ReadyEndpoint))
-
 	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
@@ -70,6 +61,7 @@ func main() {
 		}))
 
 	// Register the APIs
+	global.Register(router, logger)
 	v1.Register(router, logger)
 	// v2.Register(router, logger)
 	// ...
