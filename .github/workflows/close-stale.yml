@@ -17,4 +17,4 @@ jobs:
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity.'
           days-before-stale: 60
           days-before-close: 7
-          days-before-pr-close: -1
+          days-before-pr-close: -1 
