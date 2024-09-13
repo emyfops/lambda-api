@@ -28,6 +28,7 @@ jobs:
         with:
           name: Lambda RPC ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
           
   docker:
     name: Build and Push Docker Image
