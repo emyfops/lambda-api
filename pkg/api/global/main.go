@@ -22,7 +22,7 @@ func Register(router *gin.Engine, logger *slog.Logger) {
 	// Readiness checks
 	health.AddReadinessCheck("http-connection-mojang-session",
 		healthcheck.Async(
-			healthz.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined", 200*time.Millisecond), 60*time.Second),
+			healthz.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined", 2000*time.Millisecond), 60*time.Second),
 	)
 
 	global.GET("/live", gin.WrapF(health.LiveEndpoint))
