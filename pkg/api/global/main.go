@@ -1,9 +1,9 @@
 package global
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/healthz"
+	"github.com/Edouard127/lambda-rpc/internal/app/healthcheck"
+	"github.com/alexliesenfeld/health"
 	"github.com/gin-gonic/gin"
-	"github.com/heptiolabs/healthcheck"
 	sloggin "github.com/samber/slog-gin"
 	"log/slog"
 	"time"
@@ -14,17 +14,23 @@ func Register(router *gin.Engine, logger *slog.Logger) {
 	global.Use(sloggin.New(logger.With("module", "api/global")))
 
 	// Initialize the healthcheck handler
-	health := healthcheck.NewHandler()
+	checker := health.NewChecker(
+		// 2 second TTL
+		health.WithCacheDuration(2*time.Second),
 
-	// Liveness checks
-	// health.AddLivenessCheck(...)
+		// Global timeout of 5 seconds
+		health.WithTimeout(5*time.Second),
 
-	// Readiness checks
-	health.AddReadinessCheck("http-connection-mojang-session",
-		healthcheck.Async(
-			healthz.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined", 2000*time.Millisecond), 60*time.Second),
+		// Mojang API readiness check
+		health.WithPeriodicCheck(
+			60*time.Second,
+			time.Second,
+			health.Check{
+				Name:  "http-connection-mojang-session",
+				Check: healthcheck.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined"),
+			},
+		),
 	)
 
-	global.GET("/live", gin.WrapF(health.LiveEndpoint))
-	global.GET("/ready", gin.WrapF(health.ReadyEndpoint))
+	global.GET("/health", gin.WrapF(health.NewHandler(checker)))
 }

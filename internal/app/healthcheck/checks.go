@@ -1,26 +1,30 @@
-package healthz
+package healthcheck
 
 import (
+	"context"
 	"fmt"
-	"github.com/heptiolabs/healthcheck"
 	"net/http"
 	"time"
 )
 
-func HTTPGetCheck(url string, timeout time.Duration) healthcheck.Check {
+func HTTPGetCheck(url string) func(ctx context.Context) error {
 	client := http.Client{
-		Timeout: timeout,
 		// never follow redirects
 		CheckRedirect: func(*http.Request, []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 	}
-	return func() error {
+
+	return func(ctx context.Context) error {
+		// Retrieve and set the timeout from the health library
+		deadline, _ := ctx.Deadline()
+		client.Timeout = time.Since(deadline)
+
 		resp, err := client.Get(url)
 		if err != nil {
 			return err
 		}
-		resp.Body.Close()
+
 		if resp.StatusCode < 200 && resp.StatusCode >= 300 {
 			return fmt.Errorf("returned status %d", resp.StatusCode)
 		}
