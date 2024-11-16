@@ -19,11 +19,11 @@ import (
 	"os"
 )
 
-// @Title Lambda RPC API
+// @Title Lambda API
 // @Version 1.0
-// @Description This is the API for the Lambda Discord RPC handler
+// @Description This is the official API for Lambda Client
 // @Contact.Name Lambda Discord
-// @Contact.Url https://discord.gg/J23U4YEaAr
+// @Contact.Url https://discord.gg/QjfBxJzE5x
 //
 // @license.name GNU General Public License v3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
@@ -45,7 +45,7 @@ func main() {
 
 	// Setup metrics
 	router.Use(middlewares.PrometheusMiddleware())
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	go http.ListenAndServe(":9100", promhttp.Handler())
 
 	// Provide swagger documentation
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
