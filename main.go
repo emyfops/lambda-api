@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Edouard127/lambda-rpc/internal/app/state"
 	_ "github.com/Edouard127/lambda-rpc/openapi-spec"
 	"github.com/Edouard127/lambda-rpc/pkg/api/global"
@@ -62,7 +61,7 @@ func main() {
 	// Return OK for the root path (helm chart test)
 	router.GET("/", func(ctx *gin.Context) { ctx.String(http.StatusNoContent, "OK") })
 
-	_ = router.Run(fmt.Sprintf(":%d", state.CurrentArgs.Port))
+	_ = router.Run(":8080")
 }
 
 func init() {
