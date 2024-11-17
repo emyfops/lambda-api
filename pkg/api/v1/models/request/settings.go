@@ -1,5 +1,5 @@
 package request
 
-import "github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+import "github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 
 type Settings = response.Settings

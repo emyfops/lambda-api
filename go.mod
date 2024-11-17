@@ -1,12 +1,12 @@
-module github.com/Edouard127/lambda-rpc
+module github.com/Edouard127/lambda-api
 
 go 1.23.1
 
 require (
 	github.com/alexflint/go-arg v1.5.1
+	github.com/alexliesenfeld/health v0.8.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/heptiolabs/healthcheck v0.0.0-20211123025425-613501dd5deb
 	github.com/prometheus/client_golang v1.20.3
 	github.com/samber/slog-gin v1.13.4
 	github.com/swaggo/files v1.0.1
@@ -17,7 +17,6 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/alexflint/go-scalar v1.2.0 // indirect
-	github.com/alexliesenfeld/health v0.8.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.11.9 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
@@ -60,6 +59,5 @@ require (
 	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/tools v0.25.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
-	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

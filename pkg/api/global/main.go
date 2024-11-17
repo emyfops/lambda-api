@@ -1,7 +1,7 @@
 package global
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/healthcheck"
+	"github.com/Edouard127/lambda-api/internal/app/healthcheck"
 	"github.com/alexliesenfeld/health"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -11,7 +11,7 @@ import (
 
 func Register(router *gin.Engine, logger *slog.Logger) {
 	global := router.Group("/api")
-	global.Use(sloggin.New(logger.With("module", "api/global")))
+	global.Use(sloggin.New(logger.With("module", "api/v0")))
 
 	// Initialize the healthcheck handler
 	checker := health.NewChecker(

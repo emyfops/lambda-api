@@ -1,10 +1,10 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/internal/app/memory"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/internal/app/memory"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
@@ -22,17 +22,17 @@ func init() {
 }
 
 // JoinParty godoc
-// @BasePath /api/v1
-// @Summary Join a party
-// @Tags Party
-// @Accept json
-// @Produce json
-// @Param ID body string true "Party ID"
-// @Success 202 {object} response.Party
-// @Failure 400 {object} response.ValidationError
-// @Failure 404 {object} response.Error
-// @Router /party/join [put]
-// @Security Bearer
+//
+//	@Summary	Join a party
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	body		string	true	"Party ID"
+//	@Success	202	{object}	response.Party
+//	@Failure	400	{object}	response.ValidationError
+//	@Failure	404	{object}	response.Error
+//	@Router		/party/join [put]
+//	@Security	ApiKeyAuth
 func JoinParty(ctx *gin.Context) {
 	var join request.JoinParty
 	if err := ctx.Bind(&join); err != nil {

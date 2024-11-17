@@ -1,10 +1,10 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/internal/app/memory"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/internal/app/memory"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
@@ -28,18 +28,18 @@ var playerMap = memory.NewCache[response.Player, string]()
 // &Party ID -> &Party
 var partyMap = memory.NewCache[string, *response.Party]()
 
-// CreateParty godoc
-// @BasePath /api/v1
-// @Summary Create a new party
-// @Tags Party
-// @Accept json
-// @Produce json
-// @Param Settings body request.Settings false "Settings"
-// @Success 201 {object} response.Party
-// @Failure 400 {object} response.ValidationError
-// @Failure 409 {object} response.Error
-// @Router /party/create [post]
-// @Security Bearer
+// CreateParty 	godoc
+//
+//	@Summary	Create a new party
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	json
+//	@Param		settings	body		request.Settings	false	"Party configuration"
+//	@Success	201			{object}	response.Party
+//	@Failure	400			{object}	response.ValidationError
+//	@Failure	409			{object}	response.Error
+//	@Router		/party/create [post]
+//	@Security	ApiKeyAuth
 func CreateParty(ctx *gin.Context) {
 	var settings request.Settings
 	if err := ctx.Bind(&settings); err != nil {

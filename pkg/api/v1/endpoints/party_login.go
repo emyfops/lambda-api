@@ -1,9 +1,9 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/request"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
@@ -27,18 +27,18 @@ func init() {
 }
 
 // Login godoc
-// @BasePath /api/v1
-// @Summary Login to the server
-// @Description Login to the server using a Discord identify token, a Minecraft username and a Mojang session hash
-// @Tags Authentication
-// @Accept json
-// @Produce json
-// @Param login body request.Authentication true "Authentication"
-// @Success 200 {object} response.Authentication
-// @Failure 400 {object} response.ValidationError
-// @Failure 401 {object} response.Error
-// @Failure 500 {object} response.Error
-// @Router /party/login [post]
+//
+//	@Summary		Login to the server
+//	@Description	Login to the server using a Discord identify token, a Minecraft username and a Mojang session hash
+//	@Tags			Authentication
+//	@Accept			json
+//	@Produce		json
+//	@Param			login	body		request.Authentication	true	"Authentication"
+//	@Success		200		{object}	response.Authentication
+//	@Failure		400		{object}	response.ValidationError
+//	@Failure		401		{object}	response.Error
+//	@Failure		500		{object}	response.Error
+//	@Router			/party/login [post]
 func Login(ctx *gin.Context) {
 	var login request.Authentication
 	if err := ctx.Bind(&login); err != nil {

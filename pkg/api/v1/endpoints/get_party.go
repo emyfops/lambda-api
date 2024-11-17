@@ -1,22 +1,22 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-// GetParty godoc
-// @BasePath /api/v1
-// @Summary Get the party of the player
-// @Tags Party
-// @Accept json
-// @Produce json
-// @Success 200 {object} response.Party
-// @Failure 404 {object} response.Error
-// @Router /party [get]
-// @Security Bearer
+// GetParty 	godoc
+//
+//	@Summary	Get the party of the player
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	response.Party
+//	@Failure	404	{object}	response.Error
+//	@Router		/party [get]
+//	@Security	ApiKeyAuth
 func GetParty(ctx *gin.Context) {
 	player := auth.GinMustGet[response.Player](ctx, "player")
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Edouard127/lambda-rpc/internal/app/state"
+	"github.com/Edouard127/lambda-api/internal/app/state"
 	"io"
 	"net/http"
 )

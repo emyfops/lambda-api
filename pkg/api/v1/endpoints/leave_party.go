@@ -1,22 +1,22 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 // LeaveParty godoc
-// @BasePath /api/v1
-// @Summary Leave a party
-// @Tags Party
-// @Accept json
-// @Produce json
-// @Success 202
-// @Failure 404 {object} response.Error
-// @Router /party/leave [put]
-// @Security Bearer
+//
+//	@Summary	Leave a party
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	json
+//	@Success	202
+//	@Failure	404	{object}	response.Error
+//	@Router		/party/leave [put]
+//	@Security	ApiKeyAuth
 func LeaveParty(ctx *gin.Context) {
 	player := auth.GinMustGet[response.Player](ctx, "player")
 

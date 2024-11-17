@@ -1,23 +1,23 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-rpc/internal/app/auth"
-	"github.com/Edouard127/lambda-rpc/pkg/api/v1/models/response"
+	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-// DeleteParty godoc
-// @BasePath /api/v1
-// @Summary Delete an existing party
-// @Tags Party
-// @Accept json
-// @Produce json
-// @Success 204
-// @Failure 403 {object} response.Error
-// @Failure 404 {object} response.Error
-// @Router /party/delete [delete]
-// @Security Bearer
+// DeleteParty 	godoc
+//
+//	@Summary	Delete an existing party
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	json
+//	@Success	204
+//	@Failure	403	{object}	response.Error
+//	@Failure	404	{object}	response.Error
+//	@Router		/party/delete [delete]
+//	@Security	ApiKeyAuth
 func DeleteParty(ctx *gin.Context) {
 	player := auth.GinMustGet[response.Player](ctx, "player")
 
