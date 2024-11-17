@@ -61,7 +61,7 @@ func main() {
 	// Return OK for the root path (helm chart test)
 	router.GET("/", func(ctx *gin.Context) { ctx.String(http.StatusNoContent, "OK") })
 
-	_ = router.Run(":8080")
+	_ = router.Run(":80")
 }
 
 func init() {

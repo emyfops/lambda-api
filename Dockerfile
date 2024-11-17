@@ -34,8 +34,8 @@ RUN set +x \
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main /app/
 
-# Expose port 8080 and 9100 for the web and metrics
-EXPOSE 8080
+# Expose port 80 and 9100 for the web and metrics
+EXPOSE 80
 EXPOSE 9100
 
 # Run the server
