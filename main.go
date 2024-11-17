@@ -35,7 +35,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(
 		os.Stdout,
 		&slog.HandlerOptions{
-			Level: state.CurrentArgs.Verbose,
+			Level: state.CurrentArgs.LogLevel,
 		}),
 	)
 
