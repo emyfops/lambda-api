@@ -11,7 +11,7 @@ concurrency:
 
 env:
   DOCKER_USERNAME: edouard127
-  DOCKER_IMAGE: lambda-rpc
+  DOCKER_IMAGE: lambda-api
 
 jobs:
   build:
@@ -26,9 +26,11 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.8
         with:
-          name: Lambda RPC ${{ github.ref_name }}
+          name: Lambda API ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
+          append_body: true
+          make_latest: "true"
           
   docker:
     name: Build and Push Docker Image
