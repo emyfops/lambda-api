@@ -25,6 +25,7 @@ func GetParty(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
+		return
 	}
 
 	party, exists := partyMap.Get(*id)
@@ -32,6 +33,7 @@ func GetParty(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
+		return
 	}
 
 	ctx.AbortWithStatusJSON(http.StatusOK, party)

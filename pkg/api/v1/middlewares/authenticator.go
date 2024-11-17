@@ -18,7 +18,7 @@ func CheckAuth(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := auth.ParseJwtToken(token[1][:len(token[1])-1]) // Temporary fix for the trailing quotation mark
+	jwt, err := auth.ParseJwtToken(token[1][:len(token[1])-1]) // TODO: Temporary fix for the trailing quotation mark
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "The JWT token is invalid, please provide a valid JWT token",

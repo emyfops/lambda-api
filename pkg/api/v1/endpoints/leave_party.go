@@ -25,6 +25,7 @@ func LeaveParty(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
+		return
 	}
 
 	partyMap.Delete(*id)

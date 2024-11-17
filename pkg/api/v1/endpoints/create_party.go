@@ -57,6 +57,7 @@ func CreateParty(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusConflict, response.Error{
 			Message: "You are already in a party",
 		})
+		return
 	}
 
 	party := response.NewWithSettings(player, &settings)

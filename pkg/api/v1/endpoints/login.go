@@ -22,6 +22,10 @@ var (
 	}, []string{"version"})
 )
 
+func init() {
+	prometheus.MustRegister(successfulLogins, failedLogins)
+}
+
 // Login godoc
 // @BasePath /api/v1
 // @Summary Login to the server
