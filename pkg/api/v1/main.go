@@ -8,23 +8,23 @@ import (
 	"log/slog"
 )
 
-// @Title			Lambda API
-// @Version		v1
-// @Description	This is the official API for Lambda Client
+//	@Title						Lambda API
+//	@Version					v1
+//	@Description				This is the official API for Lambda Client
 //
-// @BasePath					/api/v1
-// @Schemes					http https
+//	@BasePath					/api/v1
+//	@Schemes					http https
 //
-// @Contact.name				Lambda Discord
-// @Contact.url				https://discord.gg/QjfBxJzE5x
+//	@Contact.name				Lambda Discord
+//	@Contact.url				https://discord.gg/QjfBxJzE5x
 //
-// @License.name				GNU General Public License v3.0
-// @License.url				https://www.gnu.org/licenses/gpl-3.0.html
+//	@License.name				GNU General Public License v3.0
+//	@License.url				https://www.gnu.org/licenses/gpl-3.0.html
 //
-// @SecurityDefinitions.ApiKey	Bearer
-// @In							header
-// @Name						Authorization
-// @Description				Type "Bearer" followed by a space and JWT token.
+//	@SecurityDefinitions.ApiKey	Bearer
+//	@In							header
+//	@Name						Authorization
+//	@Description				Type "Bearer" followed by a space and JWT token.
 func Register(router *gin.Engine, logger *slog.Logger) {
 	v1 := router.Group("/api/v1")
 	v1.Use(sloggin.New(logger.With("module", "api/v1")))
