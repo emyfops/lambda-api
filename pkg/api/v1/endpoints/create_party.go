@@ -6,6 +6,7 @@ import (
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 )
@@ -22,11 +23,11 @@ func init() {
 }
 
 // Player -> &Party ID
-var playerMap = memory.NewCache[response.Player, string]()
+var playerMap = memory.NewCache[response.Player, uuid.UUID]()
 
 // Reverse mapping of playerMap
 // &Party ID -> &Party
-var partyMap = memory.NewCache[string, *response.Party]()
+var partyMap = memory.NewCache[uuid.UUID, *response.Party]()
 
 // CreateParty 	godoc
 //
@@ -62,8 +63,8 @@ func CreateParty(ctx *gin.Context) {
 
 	party := response.NewPartyWithSettings(player, &settings)
 
-	partyMap.Set(party.ID, party, -1)
-	playerMap.Set(player, party.ID, -1)
+	partyMap.Set(party.ID, party, memory.NoExpiration)
+	playerMap.Set(player, party.ID, memory.NoExpiration)
 
 	partyCountTotal.WithLabelValues("v1").Inc()
 

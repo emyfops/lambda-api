@@ -15,7 +15,7 @@ func TestNewCache(t *testing.T) {
 	}
 
 	for i := 0; i < 9000; i++ {
-		c.Set(string(rune(i)), i, -1)
+		c.Set(string(rune(i)), i, NoExpiration)
 	}
 
 	for i := 0; i < 9000; i++ {

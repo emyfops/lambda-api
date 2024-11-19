@@ -59,6 +59,7 @@ func (c *Cache[T, K]) Get(key T) (*K, bool) {
 }
 
 // Set sets a value in the cache with the given key.
+//   - If exp is set to NoExpiration, the value will never expire.
 func (c *Cache[T, K]) Set(key T, value K, exp time.Duration) {
 	c.mu.Lock()
 
