@@ -20,7 +20,7 @@ var pubKeyBuffer bytes.Buffer
 
 func init() {
 	var err error
-	
+
 	privKey, err = rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic("failed to generate private key: " + err.Error())
@@ -43,8 +43,8 @@ func init() {
 	}
 }
 
-// CreateJwtToken generates a JWT (and signs it with a generated certificate)
-func CreateJwtToken(claims any) (signed string, err error) {
+// NewJwt generates a JWT and signs it with a certificate
+func NewJwt(claims any) (signed string, err error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"nbf":  time.Now().Unix(),
 		"exp":  time.Now().Add(time.Hour * 24).Unix(),
@@ -61,8 +61,8 @@ func CreateJwtToken(claims any) (signed string, err error) {
 	return
 }
 
-// ParseJwtToken parses a JWT token
-func ParseJwtToken(signed string) (token *jwt.Token, err error) {
+// ParseString parses a signed JWT token from a given string
+func ParseString(signed string) (token *jwt.Token, err error) {
 	pubKey, err := x509.ParsePKIXPublicKey(pubKeyBlock.Bytes)
 	if err != nil {
 		return token, errors.New("failed to parse public key: " + err.Error())
@@ -76,7 +76,8 @@ func ParseJwtToken(signed string) (token *jwt.Token, err error) {
 	return token, nil
 }
 
-func ParseToStruct[T any](token *jwt.Token, result *T) error {
+// ParseStruct takes a given JWT token and parses the data field into the provided struct pointer
+func ParseStruct[T any](token *jwt.Token, result *T) error {
 	parsed, ok := token.Claims.(jwt.MapClaims)["data"]
 	if !ok {
 		return errors.New("data field not found in JWT claims")

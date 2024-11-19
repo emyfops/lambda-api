@@ -58,7 +58,7 @@ func Login(ctx *gin.Context) {
 		failedLogins.WithLabelValues("v1").Inc()
 	}
 
-	signed, err := auth.CreateJwtToken(player)
+	signed, err := auth.NewJwt(player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
 			Message: "Failed to create token",

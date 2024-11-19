@@ -18,7 +18,7 @@ func CheckAuth(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := auth.ParseJwtToken(token[1][:len(token[1])-1]) // TODO: Temporary fix for the trailing quotation mark
+	jwt, err := auth.ParseString(token[1][:len(token[1])-1]) // TODO: Temporary fix for the trailing quotation mark
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "The JWT token is invalid, please provide a valid JWT token",
@@ -27,7 +27,7 @@ func CheckAuth(ctx *gin.Context) {
 	}
 
 	var player response.Player
-	err = auth.ParseToStruct(jwt, &player)
+	err = auth.ParseStruct(jwt, &player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
