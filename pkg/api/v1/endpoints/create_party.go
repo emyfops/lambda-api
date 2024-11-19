@@ -61,7 +61,7 @@ func CreateParty(ctx *gin.Context) {
 		return
 	}
 
-	party := response.NewPartyWithSettings(player, &settings)
+	party := response.NewParty(player, &settings)
 
 	partyMap.Set(party.ID, party, memory.NoExpiration)
 	playerMap.Set(player, party.ID, memory.NoExpiration)
