@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/internal/app/jwt"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,7 +18,7 @@ func CheckAuth(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := auth.ParseString(token[1][:len(token[1])-1]) // TODO: Temporary fix for the trailing quotation mark
+	signed, err := jwt.ParseString(token[1][:len(token[1])-1]) // TODO: Temporary fix for the trailing quotation mark
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "The JWT token is invalid, please provide a valid JWT token",
@@ -27,7 +27,7 @@ func CheckAuth(ctx *gin.Context) {
 	}
 
 	var player response.Player
-	err = auth.ParseStruct(jwt, &player)
+	err = jwt.ParseStruct(signed, &player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",

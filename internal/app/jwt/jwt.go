@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"bytes"
@@ -43,8 +43,8 @@ func init() {
 	}
 }
 
-// NewJwt generates a JWT and signs it with a certificate
-func NewJwt(claims any) (signed string, err error) {
+// New generates a JWT and signs it with a certificate
+func New(claims any) (signed string, err error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"nbf":  time.Now().Unix(),
 		"exp":  time.Now().Add(time.Hour * 24).Unix(),

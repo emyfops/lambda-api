@@ -1,9 +1,11 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"context"
+	"github.com/Edouard127/lambda-api/internal/app/gonic"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"net/http"
 )
 
@@ -18,35 +20,28 @@ import (
 //	@Failure	404	{object}	response.Error
 //	@Router		/party/delete [delete]
 //	@Security	ApiKeyAuth
-func DeleteParty(ctx *gin.Context) {
-	player := auth.GinMustGet[response.Player](ctx, "player")
+func DeleteParty(ctx *gin.Context, client *redis.Client) {
+	var party response.Party
+	player := gonic.MustGet[response.Player](ctx, "player")
 
-	partyID, exists := playerMap.Get(player)
-	if !exists {
+	err := client.HGetAll(context.Background(), player.String()).Scan(&party)
+	if err != nil { // todo: change this
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
 		return
 	}
 
-	party, exists := partyMap.Get(*partyID)
-	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
-			Message: "The party does not exist",
-		})
-		return
-	}
-
-	if (*party).Leader != player {
+	if party.Leader != player {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
 			Message: "You are not the leader of the party",
 		})
 		return
 	}
 
-	partyMap.Delete(*partyID)
-	playerMap.Delete(player)
-	loggedInTotal.WithLabelValues("v1").Dec()
+	client.Del(context.Background(), player.String())
 
 	ctx.AbortWithStatus(http.StatusNoContent)
+	partyCountTotal.WithLabelValues("v1").Dec()
+	loggedInTotal.WithLabelValues("v1").Sub(float64(len(party.Players)))
 }

@@ -10,24 +10,24 @@ import (
 type Party struct {
 	// The ID of the party.
 	// It is a random UUID.
-	ID uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id" redis:"id"`
 
 	// The join secret of the party.
 	// It is a random string of 100 characters.
-	JoinSecret string `json:"join_secret"`
+	JoinSecret string `json:"join_secret" redis:"join_secret"`
 
 	// The leader of the party.
-	Leader Player `json:"leader"`
+	Leader Player `json:"leader" redis:"leader"`
 
 	// The creation date of the party.
 	// example: 2021-10-10T12:00:00Z
-	Creation time.Time `json:"creation"`
+	Creation time.Time `json:"creation" redis:"creation"`
 
 	// The list of players in the party.
-	Players []Player `json:"players"`
+	Players []Player `json:"players" redis:"players"`
 
 	// The settings of the party.
-	Settings Settings `json:"settings"`
+	Settings Settings `json:"settings" redis:"settings"`
 }
 
 // NewParty returns a new party with the given leader and settings.
@@ -46,6 +46,7 @@ func NewParty(leader Player, settings *Settings) *Party {
 	}
 }
 
+// TODO: Return error if full
 func (pt *Party) Add(player Player) {
 	pt.Players = append(pt.Players, player)
 }

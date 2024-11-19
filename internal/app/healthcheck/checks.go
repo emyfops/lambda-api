@@ -3,6 +3,7 @@ package healthcheck
 import (
 	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"net/http"
 	"time"
 )
@@ -29,5 +30,15 @@ func HTTPGetCheck(url string) func(ctx context.Context) error {
 			return fmt.Errorf("returned status %d", resp.StatusCode)
 		}
 		return nil
+	}
+}
+
+func RedisCheck(client *redis.Client) func(ctx context.Context) error {
+	return func(ctx context.Context) error {
+		deadline, _ := ctx.Deadline()
+		client.WithTimeout(time.Since(deadline))
+
+		_, err := client.Ping(ctx).Result()
+		return err
 	}
 }

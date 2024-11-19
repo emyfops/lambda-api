@@ -4,12 +4,13 @@ import (
 	"github.com/Edouard127/lambda-api/internal/app/healthcheck"
 	"github.com/alexliesenfeld/health"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	sloggin "github.com/samber/slog-gin"
 	"log/slog"
 	"time"
 )
 
-func Register(router *gin.Engine, logger *slog.Logger) {
+func Register(client *redis.Client, router *gin.Engine, logger *slog.Logger) {
 	global := router.Group("/api")
 	global.Use(sloggin.New(logger.With("module", "api/v0")))
 
@@ -28,6 +29,16 @@ func Register(router *gin.Engine, logger *slog.Logger) {
 			health.Check{
 				Name:  "http-connection-mojang-session",
 				Check: healthcheck.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined"),
+			},
+		),
+
+		// Redis readiness check
+		health.WithPeriodicCheck(
+			5*time.Second,
+			time.Second,
+			health.Check{
+				Name:  "redis-connection",
+				Check: healthcheck.RedisCheck(client),
 			},
 		),
 	)

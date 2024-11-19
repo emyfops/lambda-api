@@ -1,12 +1,13 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/auth"
-	"github.com/Edouard127/lambda-api/internal/app/memory"
+	"context"
+	"github.com/Edouard127/lambda-api/internal/app/gonic"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/redis/go-redis/v9"
 	"net/http"
 )
 
@@ -33,7 +34,8 @@ func init() {
 //	@Failure	404	{object}	response.Error
 //	@Router		/party/join [put]
 //	@Security	ApiKeyAuth
-func JoinParty(ctx *gin.Context) {
+func JoinParty(ctx *gin.Context, client *redis.Client) {
+	var party response.Party
 	var join request.JoinParty
 	if err := ctx.Bind(&join); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
@@ -43,18 +45,18 @@ func JoinParty(ctx *gin.Context) {
 		return
 	}
 
-	player := auth.GinMustGet[response.Player](ctx, "player")
+	player := gonic.MustGet[response.Player](ctx, "player")
 
-	party, exists := partyMap.Get(join.ID)
-	if !exists {
+	err := client.HGetAll(context.Background(), player.String()).Scan(&party)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
 	}
 
-	(*party).Add(player)
-	playerMap.Set(player, join.ID, memory.NoExpiration)
-	loggedInTotal.WithLabelValues("v1").Inc()
+	party.Add(player)
+	client.HSet(context.Background(), player.String(), "players", party.Players)
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
+	loggedInTotal.WithLabelValues("v1").Inc()
 }

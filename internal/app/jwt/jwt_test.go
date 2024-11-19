@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ func TestNewJwt(t *testing.T) {
 		Info string `json:"info"`
 	}
 
-	signed, err := NewJwt(&test{Info: "aaa"})
+	signed, err := New(&test{Info: "aaa"})
 	if err != nil {
 		t.Error(err)
 	}

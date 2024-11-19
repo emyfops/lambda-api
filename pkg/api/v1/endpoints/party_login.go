@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/auth"
+	"github.com/Edouard127/lambda-api/internal/app/jwt"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
@@ -58,7 +58,7 @@ func Login(ctx *gin.Context) {
 		failedLogins.WithLabelValues("v1").Inc()
 	}
 
-	signed, err := auth.NewJwt(player)
+	signed, err := jwt.New(player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
 			Message: "Failed to create token",
