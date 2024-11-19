@@ -30,8 +30,8 @@ type Party struct {
 	Settings Settings `json:"settings"`
 }
 
-// NewWithSettings returns a new party with the given leader and settings.
-func NewWithSettings(leader Player, settings *Settings) *Party {
+// NewPartyWithSettings returns a new party with the given leader and settings.
+func NewPartyWithSettings(leader Player, settings *Settings) *Party {
 	if settings == nil {
 		settings = DefaultSettings
 	}
@@ -46,9 +46,9 @@ func NewWithSettings(leader Player, settings *Settings) *Party {
 	}
 }
 
-// New returns a new party with the given leader and default settings.
-func New(leader Player) *Party {
-	return NewWithSettings(leader, DefaultSettings)
+// NewParty returns a new party with the given leader and default settings.
+func NewParty(leader Player) *Party {
+	return NewPartyWithSettings(leader, DefaultSettings)
 }
 
 func (pt *Party) Add(player Player) {
