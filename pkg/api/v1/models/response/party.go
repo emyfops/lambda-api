@@ -2,15 +2,15 @@ package response
 
 import (
 	"github.com/Edouard127/lambda-api/internal/app/random"
+	"github.com/google/uuid"
 	"time"
 )
 
-// The Party represents a Discord party.
-// It contains an ID, a creation date and a list of players.
+// Party represents a lobby of players
 type Party struct {
 	// The ID of the party.
-	// It is a random string of 30 characters.
-	ID string `json:"id"`
+	// It is a random UUID.
+	ID uuid.UUID `json:"id"`
 
 	// The join secret of the party.
 	// It is a random string of 100 characters.
@@ -37,7 +37,7 @@ func NewPartyWithSettings(leader Player, settings *Settings) *Party {
 	}
 
 	return &Party{
-		ID:         random.RandString(30),
+		ID:         random.RandUUID(),
 		JoinSecret: random.RandString(100),
 		Leader:     leader,
 		Creation:   time.Now(),

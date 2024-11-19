@@ -1,12 +1,10 @@
 package random
 
 import (
+	"github.com/google/uuid"
 	"math/rand"
-	"time"
 	"unsafe"
 )
-
-var src = rand.NewSource(time.Now().UnixNano())
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (
@@ -23,12 +21,12 @@ func RandBytesMaskSrc(n int) []byte {
 	// The index is n-1 because we are 0-indexed.
 	// The cache is the current integer we are generating characters from.
 	for i, cache, remain :=
-		n-1, src.Int63(), letterIdxMax; i >= 0; {
+		n-1, rand.Int63(), letterIdxMax; i >= 0; {
 
 		// If the remain is 0, we generate a new random int 63 bits
 		// and start over.
 		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
+			cache, remain = rand.Int63(), letterIdxMax
 		}
 
 		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
@@ -56,26 +54,9 @@ func RandString(n int) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-func RandInt32() int32 {
-	b := RandBytesMaskSrc(4)
+func RandUUID() uuid.UUID {
+	// There should never be an error here
+	id, _ := uuid.FromBytes(RandBytesMaskSrc(16))
 
-	return *(*int32)(unsafe.Pointer(&b)) * 72834575
-}
-
-func RandInt64() int64 {
-	b := RandBytesMaskSrc(8)
-
-	return *(*int64)(unsafe.Pointer(&b)) * 2136454364331265436
-}
-
-func RandFloat() float32 {
-	b := RandBytesMaskSrc(4)
-
-	return *(*float32)(unsafe.Pointer(&b)) * 127947540965326543
-}
-
-func RandDouble() float64 {
-	b := RandBytesMaskSrc(8)
-
-	return *(*float64)(unsafe.Pointer(&b)) * 78956574865453257654
+	return id
 }
