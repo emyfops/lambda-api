@@ -57,9 +57,13 @@ func GetPlayer(token, name, hash string) (pl Player, err error) {
 }
 
 // GetMinecraft authenticates a user with the Mojang session hash.
-// It is used to prove that a user owns a Minecraft account and is connected
-// to a server without requiring OAuth2 authentication.
-// However, the session hash is only valid for a very small time-frame.
+//
+//		This function proves the authenticity of a Minecraft username by checking
+//		the session hash provided by the client.  The hash originally comes
+//		from the server and is generated using the Yggdrasil Public Key.
+//	 This is not the most secure way of authenticating users since the hash
+//	 is susceptible to replay attacks.  However, it is the only way to
+//	 authenticate users without requesting access to their Microsoft account.
 func GetMinecraft(name, hash string, player *Player) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=%s&serverId=%s", name, hash), nil)
 	if err != nil {
