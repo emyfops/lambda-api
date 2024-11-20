@@ -51,7 +51,6 @@ func Login(ctx *gin.Context) {
 
 	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
 	if err != nil {
-		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
 			Message: "Invalid credentials",
 		})
