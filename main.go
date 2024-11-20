@@ -4,10 +4,10 @@ package main
 
 import (
 	"context"
+	"github.com/Edouard127/lambda-api/cmd"
 	"github.com/Edouard127/lambda-api/pkg/api/global"
 	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
-	"github.com/Edouard127/lambda-api/pkg/cmd"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
