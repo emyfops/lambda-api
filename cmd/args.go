@@ -7,7 +7,7 @@ import (
 )
 
 var cliOptions Args
-var dbOptions *redis.Options
+var dbOptions redis.Options
 
 type Args struct {
 	Environment   string     `arg:"--environment,env:ENVIRONMENT" help:"Staging environment" default:"debug" placeholder:"debug | release | test |"`
@@ -36,5 +36,5 @@ func Arguments() Args {
 }
 
 func RedisOptions() *redis.Options {
-	return &*dbOptions // Prevent modification of the original struct
+	return &*&dbOptions // Prevent modification of the original struct
 }
