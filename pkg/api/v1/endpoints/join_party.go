@@ -45,6 +45,13 @@ func JoinParty(ctx *gin.Context, client *redis.Client) {
 		return
 	}
 
+	if len(party.Players) >= party.Settings.MaxPlayers {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
+			Message: "The party is full",
+		})
+		return
+	}
+
 	player := gonic.MustGet[response.Player](ctx, "player")
 
 	err := client.HGetAll(context.Background(), player.String()).Scan(&party)
