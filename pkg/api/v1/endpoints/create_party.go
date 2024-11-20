@@ -48,7 +48,7 @@ func CreateParty(ctx *gin.Context, client *redis.Client) {
 	player := gonic.MustGet[response.Player](ctx, "player")
 
 	_, err := client.Get(context.Background(), player.String()).Result()
-	if errors.Is(err, redis.Nil) {
+	if !errors.Is(err, redis.Nil) {
 		// We should only check against redis.Nil
 		// If we get another error it most likely means
 		// that something went wrong, either the party
