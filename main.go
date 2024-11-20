@@ -42,7 +42,7 @@ func main() {
 	go func() {
 		err := http.ListenAndServe(":9100", promhttp.Handler())
 		if err != nil {
-			logger.Error("Failed to start prometheus metrics", err.Error())
+			panic(err)
 		}
 	}()
 
