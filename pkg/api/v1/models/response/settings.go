@@ -9,10 +9,10 @@ type Settings struct {
 	// If false can only be joined by Discord invites.
 	// If true can be joined by anyone with the join secret
 	// example: true
-	Public bool `json:"public" form:"public" xml:"public"`
+	// Public bool `json:"public" form:"public" xml:"public"`
 }
 
 var DefaultSettings = &Settings{
 	MaxPlayers: 10,
-	Public:     false,
+	// Public:     false,
 }
