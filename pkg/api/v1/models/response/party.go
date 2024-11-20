@@ -37,7 +37,7 @@ func NewParty(leader Player, settings *Settings) *Party {
 	}
 
 	return &Party{
-		ID:         random.RandUUID(),
+		ID:         uuid.New(),
 		JoinSecret: random.RandString(100),
 		Leader:     leader,
 		Creation:   time.Now(),
@@ -46,7 +46,6 @@ func NewParty(leader Player, settings *Settings) *Party {
 	}
 }
 
-// TODO: Return error if full
 func (pt *Party) Add(player Player) {
 	pt.Players = append(pt.Players, player)
 }

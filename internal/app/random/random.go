@@ -1,7 +1,6 @@
 package random
 
 import (
-	"github.com/google/uuid"
 	"math/rand"
 	"unsafe"
 )
@@ -52,11 +51,4 @@ func RandString(n int) string {
 	// The length of b is n, so we can safely cast it to a string
 	// and avoid the overhead of a copy.
 	return *(*string)(unsafe.Pointer(&b))
-}
-
-func RandUUID() uuid.UUID {
-	// There should never be an error here
-	id, _ := uuid.FromBytes(RandBytesMaskSrc(16))
-
-	return id
 }
