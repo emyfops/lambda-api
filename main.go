@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"github.com/Edouard127/lambda-api/cmd"
+	_ "github.com/Edouard127/lambda-api/openapi-spec" // Required for swagger documentation
 	"github.com/Edouard127/lambda-api/pkg/api/global"
 	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
@@ -16,8 +17,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-
-	_ "github.com/Edouard127/lambda-api/openapi-spec" // Required for swagger documentation
 )
 
 func main() {
@@ -43,7 +42,7 @@ func main() {
 	go func() {
 		err := http.ListenAndServe(":9100", promhttp.Handler())
 		if err != nil {
-			logger.Error("Failed to start prometheus metrics", err)
+			logger.Error("Failed to start prometheus metrics", err.Error())
 		}
 	}()
 
