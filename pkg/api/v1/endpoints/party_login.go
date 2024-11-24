@@ -42,27 +42,30 @@ func init() {
 func Login(ctx *gin.Context) {
 	var login request.Authentication
 	if err := ctx.Bind(&login); err != nil {
+		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",
 			Errors:  err.Error(),
 		})
-		failedLogins.WithLabelValues("v1").Inc()
+		return
 	}
 
 	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
 	if err != nil {
+		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
 			Message: "Invalid credentials",
 		})
-		failedLogins.WithLabelValues("v1").Inc()
+		return
 	}
 
 	signed, err := jwt.New(player)
 	if err != nil {
+		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
 			Message: "Failed to create token",
 		})
-		failedLogins.WithLabelValues("v1").Inc()
+		return
 	}
 
 	ctx.AbortWithStatusJSON(http.StatusOK, response.Authentication{
