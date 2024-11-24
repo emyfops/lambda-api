@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Edouard127/lambda-api/cmd"
+	"github.com/google/uuid"
 	"io"
 	"net/http"
 )
@@ -18,7 +19,7 @@ type Player struct {
 
 	// The player's UUID.
 	// example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
-	UUID string `json:"id"`
+	UUID uuid.UUID `json:"id"`
 
 	// The player's Discord ID.
 	// example: "385441179069579265"
@@ -90,7 +91,7 @@ func GetMinecraft(name, hash string, player *Player) error {
 	}
 
 	player.Name = shared.Name
-	player.UUID = shared.ID
+	player.UUID = uuid.MustParse(shared.ID)
 
 	return resp.Body.Close()
 }
