@@ -8,20 +8,17 @@ import (
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/redis/go-redis/v9"
 	"net/http"
 )
 
 var (
-	partyCountTotal = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	partyCountTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "lambda_rpc_party_count_total",
 		Help: "Total number of parties",
 	}, []string{"version"})
 )
-
-func init() {
-	prometheus.MustRegister(partyCountTotal)
-}
 
 // CreateParty 	godoc
 //

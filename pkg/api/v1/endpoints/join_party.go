@@ -7,20 +7,15 @@ import (
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/redis/go-redis/v9"
 	"net/http"
 )
 
-var (
-	loggedInTotal = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "lambda_rpc_logged_in_users",
-		Help: "Total number of logged in users",
-	}, []string{"version"})
-)
-
-func init() {
-	prometheus.MustRegister(loggedInTotal)
-}
+var loggedInTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
+	Name: "lambda_rpc_logged_in_users",
+	Help: "Total number of logged in users",
+}, []string{"version"})
 
 // JoinParty godoc
 //

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"io"
 	"net/http"
+	"os"
 )
 
 var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account")
@@ -45,7 +46,7 @@ type sharedPlayer struct {
 func GetPlayer(token, name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
-		cmd.Arguments().AllowInsecure {
+		os.Getenv().AllowInsecure {
 		// If the Minecraft account is invalid, we can still try to authenticate the player with Discord.
 		pl.Unsafe = true
 		err = nil

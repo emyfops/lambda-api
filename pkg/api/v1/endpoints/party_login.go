@@ -6,25 +6,22 @@ import (
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"net/http"
 	"time"
 )
 
 var (
-	successfulLogins = prometheus.NewCounterVec(prometheus.CounterOpts{
+	successfulLogins = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "lambda_rpc_successful_logins",
 		Help: "Total number of successful logins",
 	}, []string{"version"})
 
-	failedLogins = prometheus.NewCounterVec(prometheus.CounterOpts{
+	failedLogins = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "lambda_rpc_failed_logins",
 		Help: "Total number of failed logins",
 	}, []string{"version"})
 )
-
-func init() {
-	prometheus.MustRegister(successfulLogins, failedLogins)
-}
 
 // Login godoc
 //

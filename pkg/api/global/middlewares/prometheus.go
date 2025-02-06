@@ -3,12 +3,13 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"strconv"
 	"time"
 )
 
 var (
-	prometheusRequestsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+	prometheusRequestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "lambda_rpc_requests_total",
 		Help: "Total number of requests",
 	}, []string{"path", "method", "status"})
@@ -21,9 +22,6 @@ var (
 )
 
 func PrometheusMiddleware() gin.HandlerFunc {
-	prometheus.MustRegister(prometheusRequestsTotal)
-	prometheus.MustRegister(prometheusRequestsDuration)
-
 	return func(ctx *gin.Context) {
 		start := time.Now()
 
