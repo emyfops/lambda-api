@@ -3,12 +3,11 @@ package response
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
-	"github.com/Edouard127/lambda-api/cmd"
 	"github.com/google/uuid"
 	"io"
 	"net/http"
-	"os"
 )
 
 var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account")
@@ -46,10 +45,9 @@ type sharedPlayer struct {
 func GetPlayer(token, name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
-		os.Getenv().AllowInsecure {
+		flag.Lookup("insecure") != nil {
 		// If the Minecraft account is invalid, we can still try to authenticate the player with Discord.
 		pl.Unsafe = true
-		err = nil
 	} else {
 		return
 	}
