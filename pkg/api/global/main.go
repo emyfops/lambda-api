@@ -5,14 +5,11 @@ import (
 	"github.com/alexliesenfeld/health"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	sloggin "github.com/samber/slog-gin"
-	"log/slog"
 	"time"
 )
 
-func Register(client *redis.Client, router *gin.Engine, logger *slog.Logger) {
+func Register(client *redis.Client, router *gin.Engine) {
 	global := router.Group("/api")
-	global.Use(sloggin.New(logger.With("module", "api/v0")))
 
 	// Initialize the healthcheck handler
 	checker := health.NewChecker(

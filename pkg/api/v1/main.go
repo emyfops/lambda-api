@@ -6,8 +6,6 @@ import (
 	"github.com/Edouard127/lambda-api/pkg/api/v1/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	sloggin "github.com/samber/slog-gin"
-	"log/slog"
 )
 
 // Register godoc
@@ -29,9 +27,8 @@ import (
 //	@In							header
 //	@Name						Authorization
 //	@Description				Type "Bearer" followed by a space and JWT token.
-func Register(client *redis.Client, router *gin.Engine, logger *slog.Logger) {
+func Register(client *redis.Client, router *gin.Engine) {
 	v1 := router.Group("/api/v1")
-	v1.Use(sloggin.New(logger.With("module", "api/v1")))
 
 	// Login endpoints
 	v1.POST("/login", endpoints.Login)
