@@ -1,15 +1,14 @@
 package endpoints
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
-	"github.com/Edouard127/lambda-api/internal/app/gonic"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/redis/go-redis/v9"
 	"net/http"
 )
 
@@ -32,7 +31,7 @@ var (
 //	@Failure	409			{object}	response.Error
 //	@Router		/party/create [post]
 //	@Security	ApiKeyAuth
-func CreateParty(ctx *gin.Context, client *redis.Client) {
+func CreateParty(ctx *gin.Context, cache *memcache.Client) {
 	var settings request.Settings
 	if err := ctx.Bind(&settings); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
@@ -42,15 +41,13 @@ func CreateParty(ctx *gin.Context, client *redis.Client) {
 		return
 	}
 
-	player := gonic.MustGet[response.Player](ctx, "player")
+	player := ctx.MustGet("player").(response.Player)
 
-	_, err := client.Get(context.Background(), player.String()).Result()
-	if !errors.Is(err, redis.Nil) {
-		// We should only check against redis.Nil
-		// If we get another error it most likely means
-		// that something went wrong, either the party
-		// doesn't exist and redis is acting up, or the
-		// party was lost and needs to be recreated
+	_, err := cache.Get(player.Hash())
+	if !errors.Is(err, memcache.ErrCacheMiss) && err != nil {
+		// We should only check against memcache.ErrCacheMiss
+		// If we get another error it most likely means that something went wrong, either the
+		// cache is acting up, or the party was lost and needs to be recreated
 		ctx.AbortWithStatusJSON(http.StatusConflict, response.Error{
 			Message: "You are already in a party",
 		})
@@ -64,7 +61,8 @@ func CreateParty(ctx *gin.Context, client *redis.Client) {
 	// data if containers are scaled down
 	//
 	// Mapping: Party ID -> Party struct
-	client.HSet(context.Background(), player.String(), party)
+	bytes, _ := json.Marshal(party)
+	cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
 
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 	partyCountTotal.WithLabelValues("v1").Inc()

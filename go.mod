@@ -5,6 +5,7 @@ go 1.23.3
 require (
 	github.com/alexflint/go-arg v1.5.1
 	github.com/alexliesenfeld/health v0.8.0
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0

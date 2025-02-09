@@ -1,14 +1,13 @@
 package global
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/healthcheck"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/alexliesenfeld/health"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"time"
 )
 
-func Register(client *redis.Client, router *gin.Engine) {
+func Register(router *gin.Engine) {
 	global := router.Group("/api")
 
 	// Initialize the healthcheck handler
@@ -25,17 +24,7 @@ func Register(client *redis.Client, router *gin.Engine) {
 			time.Second,
 			health.Check{
 				Name:  "http-connection-mojang-session",
-				Check: healthcheck.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined"),
-			},
-		),
-
-		// Redis readiness check
-		health.WithPeriodicCheck(
-			5*time.Second,
-			time.Second,
-			health.Check{
-				Name:  "redis-connection",
-				Check: healthcheck.RedisCheck(client),
+				Check: internal.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined"),
 			},
 		),
 	)

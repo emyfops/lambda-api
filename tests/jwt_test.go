@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/jwt"
+	"github.com/Edouard127/lambda-api/internal"
 	"testing"
 )
 
@@ -10,18 +10,18 @@ func TestNewJwt(t *testing.T) {
 		Info string `json:"info"`
 	}
 
-	signed, err := jwt.New(&test{Info: "aaa"})
+	signed, err := internal.NewJwt(&test{Info: "aaa"})
 	if err != nil {
 		t.Error(err)
 	}
 
-	token, err := jwt.ParseString(signed)
+	token, err := internal.ParseJwt(signed)
 	if err != nil {
 		t.Error(err)
 	}
 
 	var result test
-	jwt.ParseStruct(token, &result)
+	internal.ParseStructJwt(token, &result)
 	if result.Info != "aaa" {
 		t.Errorf("expected 'aaa', got %s", result.Info)
 		return

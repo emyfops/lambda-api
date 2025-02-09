@@ -1,7 +1,7 @@
 package response
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/random"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/google/uuid"
 	"time"
 )
@@ -38,7 +38,7 @@ func NewParty(leader Player, settings *Settings) *Party {
 
 	return &Party{
 		ID:         uuid.New(),
-		JoinSecret: random.RandString(100),
+		JoinSecret: internal.RandString(100),
 		Leader:     leader,
 		Creation:   time.Now(),
 		Players:    []Player{leader},

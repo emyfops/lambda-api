@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/jwt"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/gin-gonic/gin"
@@ -56,7 +56,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	signed, err := jwt.New(player)
+	signed, err := internal.NewJwt(player)
 	if err != nil {
 		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{

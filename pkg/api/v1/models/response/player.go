@@ -1,6 +1,7 @@
 package response
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -28,6 +29,18 @@ type Player struct {
 	// Whether the player is marked as unsafe.
 	// example: true
 	Unsafe bool `json:"unsafe"`
+}
+
+// Hash returns a memcached compliant unique identifier
+func (pl *Player) Hash() string {
+	sha := sha1.New()
+	sha.Write([]byte(pl.Name))
+	sha.Write([]byte(pl.UUID.String()))
+	sha.Write([]byte(pl.DiscordID))
+
+	// TODO: Can this be exploited with two different instances online and offline ?
+
+	return string(sha.Sum(nil))
 }
 
 func (pl *Player) String() string {
