@@ -65,7 +65,7 @@ func main() {
 }
 
 func startPrometheus(logger *zap.Logger) {
-	logger.Info("Starting prometheus metrics server on :2112")
+	logger.Info("Starting prometheus metrics server on :9100")
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":9100", nil)
