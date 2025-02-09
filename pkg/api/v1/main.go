@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"github.com/Edouard127/lambda-api/internal/app/gonic"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/endpoints"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/middlewares"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 // Register godoc
@@ -27,17 +27,17 @@ import (
 //	@In							header
 //	@Name						Authorization
 //	@Description				Type "Bearer" followed by a space and JWT token.
-func Register(client *redis.Client, router *gin.Engine) {
+func Register(cache *memcache.Client, router *gin.Engine) {
 	v1 := router.Group("/api/v1")
 
 	// Login endpoints
 	v1.POST("/login", endpoints.Login)
 
 	// Party endpoints
-	v1.POST("/party/create", middlewares.CheckAuth, gonic.With(client, endpoints.CreateParty))
-	v1.PUT("/party/join", middlewares.CheckAuth, gonic.With(client, endpoints.JoinParty))
-	v1.PATCH("/party/edit", middlewares.CheckAuth, gonic.With(client, endpoints.EditParty))
-	v1.PUT("/party/leave", middlewares.CheckAuth, gonic.With(client, endpoints.LeaveParty))
-	v1.DELETE("/party/delete", middlewares.CheckAuth, gonic.With(client, endpoints.DeleteParty))
-	v1.GET("/party", middlewares.CheckAuth, gonic.With(client, endpoints.GetParty))
+	v1.POST("/party/create", middlewares.CheckAuth, internal.With(cache, endpoints.CreateParty))
+	v1.PUT("/party/join", middlewares.CheckAuth, internal.With(cache, endpoints.JoinParty))
+	v1.PATCH("/party/edit", middlewares.CheckAuth, internal.With(cache, endpoints.EditParty))
+	v1.PUT("/party/leave", middlewares.CheckAuth, internal.With(cache, endpoints.LeaveParty))
+	v1.DELETE("/party/delete", middlewares.CheckAuth, internal.With(cache, endpoints.DeleteParty))
+	v1.GET("/party", middlewares.CheckAuth, internal.With(cache, endpoints.GetParty))
 }

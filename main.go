@@ -3,16 +3,14 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"github.com/Edouard127/lambda-api/cmd"
 	_ "github.com/Edouard127/lambda-api/openapi-spec" // Required for swagger documentation
 	"github.com/Edouard127/lambda-api/pkg/api/global"
 	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
@@ -20,10 +18,15 @@ import (
 	"runtime/debug"
 )
 
+var _ = flag.Bool("insecure", false, "Insecure login")
+var mode = flag.String("staging", "debug", "Gin staging mode (info, debug, release)")
 var isDebug = flag.Bool("debug", true, "Enable debug log output")
+var cacheNodes []string // list of memcached instances
 
 func main() {
 	flag.Parse()
+	cacheNodes = flag.Args()
+
 	var logger *zap.Logger
 	if *isDebug {
 		logger = zap.Must(zap.NewDevelopment())
@@ -33,14 +36,12 @@ func main() {
 
 	printBuildInfo(logger)
 
-	// Create and initialize the redis connection
-	rdb := redis.NewClient(cmd.RedisOptions())
-	err := rdb.Ping(context.Background()).Err()
-	if err != nil {
+	mc := memcache.New(cacheNodes...)
+	if err := mc.Ping(); err != nil {
 		panic(err)
 	}
 
-	gin.SetMode("") // read the mode from the test.v flag
+	gin.SetMode(*mode)
 	router := gin.New()
 	router.SetTrustedProxies(nil)
 
@@ -52,15 +53,12 @@ func main() {
 	router.Use(gin.Recovery())
 
 	// Register the APIs
-	global.Register(rdb, router)
+	global.Register(router)
 
-	v1.Register(rdb, router)
+	v1.Register(mc, router)
 	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
 
-	// Return OK for the root path (helm chart test)
-	router.GET("/", func(ctx *gin.Context) { ctx.String(http.StatusOK, "OK") })
-
-	err = router.Run(":80")
+	err := router.Run(":8080")
 	if err != nil {
 		logger.Fatal("Server listening error", zap.Error(err))
 	}
