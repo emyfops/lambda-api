@@ -13,12 +13,12 @@ import (
 
 var (
 	successfulLogins = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "lambda_rpc_successful_logins",
+		Name: "lambda_api_successful_logins",
 		Help: "Total number of successful logins",
 	}, []string{"version"})
 
 	failedLogins = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "lambda_rpc_failed_logins",
+		Name: "lambda_api_failed_logins",
 		Help: "Total number of failed logins",
 	}, []string{"version"})
 )

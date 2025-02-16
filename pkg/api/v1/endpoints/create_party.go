@@ -14,7 +14,7 @@ import (
 
 var (
 	partyCountTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "lambda_rpc_party_count_total",
+		Name: "lambda_api_party_count_total",
 		Help: "Total number of parties",
 	}, []string{"version"})
 )
