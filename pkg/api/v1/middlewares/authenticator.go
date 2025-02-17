@@ -29,8 +29,8 @@ func CheckAuth(ctx *gin.Context) {
 	var player response.Player
 	err = internal.ParseStructJwt(signed, &player)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "You either have an invalid account or the hash has expired, please reconnect to the server",
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "An error occurred while parsing the JWT token",
 		})
 		return
 	}

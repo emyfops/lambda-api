@@ -15,20 +15,25 @@ var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account"
 
 type Player struct {
 	// The player's name.
-	// example: Notch
+	// 	example: Notch
 	Name string `json:"name"`
 
 	// The player's UUID.
-	// example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
+	// 	example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
 	UUID uuid.UUID `json:"id"`
 
 	// The player's Discord ID.
-	// example: "385441179069579265"
+	// 	example: 385441179069579265
 	DiscordID string `json:"discord_id"`
 
 	// Whether the player is marked as unsafe.
-	// example: true
+	// 	example: true
 	Unsafe bool `json:"unsafe"`
+}
+
+// HasDiscord returns whether the player has linked their discord account or not
+func (pl *Player) HasDiscord() bool {
+	return pl.DiscordID != ""
 }
 
 // Hash returns a memcached compliant unique identifier
