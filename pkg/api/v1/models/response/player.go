@@ -38,8 +38,6 @@ func (pl *Player) Hash() string {
 	sha.Write([]byte(pl.UUID.String()))
 	sha.Write([]byte(pl.DiscordID))
 
-	// TODO: Can this be exploited with two different instances online and offline ?
-
 	return string(sha.Sum(nil))
 }
 
@@ -55,17 +53,14 @@ type sharedPlayer struct {
 }
 
 // GetPlayer returns a new player with the given name, hash and token.
-func GetPlayer(token, name, hash string) (pl Player, err error) {
+func GetPlayer(name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
-		flag.Lookup("insecure") != nil {
-		// If the Minecraft account is invalid, we can still try to authenticate the player with Discord.
+		flag.Lookup("insecure").Value.String() == "true" {
 		pl.Unsafe = true
-	} else {
-		return
+		err = nil // Intercept error for insecure instances
 	}
 
-	err = GetDiscord(token, &pl)
 	return
 }
 

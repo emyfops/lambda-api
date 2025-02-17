@@ -41,8 +41,10 @@ func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 	}
 
 	cache.Delete(player.Hash())
+	cache.Delete(party.JoinSecret)
 
-	ctx.AbortWithStatus(http.StatusNoContent)
 	partyCountTotal.WithLabelValues("v1").Dec()
 	loggedInTotal.WithLabelValues("v1").Sub(float64(len(party.Players)))
+
+	ctx.AbortWithStatus(http.StatusNoContent)
 }

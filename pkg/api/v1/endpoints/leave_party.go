@@ -30,6 +30,6 @@ func LeaveParty(ctx *gin.Context, cache *memcache.Client) {
 
 	cache.Delete(player.Hash())
 
-	ctx.AbortWithStatus(http.StatusAccepted)
 	loggedInTotal.WithLabelValues("v1").Dec()
+	ctx.AbortWithStatus(http.StatusAccepted)
 }

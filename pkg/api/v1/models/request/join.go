@@ -1,9 +1,7 @@
 package request
 
-import "github.com/google/uuid"
-
 type JoinParty struct {
-	// The ID of the party.
-	// example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
-	ID uuid.UUID `json:"id" form:"id" xml:"id" binding:"required"`
+	// The join secret of the party.
+	// 	example: "RzTMeBHZu3VoNEUpNQFSnMYpSNQgWQ2rYM4u3RHSPQIacMxE4KH63OYQEDAD0P0bnjZBYUFHB0I5wOx2xEiXOU9SKBxRZ5YcvYjjiZWhsGGss3vnRajvFn4trJgTnvz2"
+	Secret string `json:"secret" binding:"required"`
 }

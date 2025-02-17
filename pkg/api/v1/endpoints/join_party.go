@@ -29,31 +29,19 @@ var loggedInTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
 //	@Router		/party/join [put]
 //	@Security	ApiKeyAuth
 func JoinParty(ctx *gin.Context, cache *memcache.Client) {
-	var party response.Party
-	var join request.JoinParty
-	if err := ctx.Bind(&join); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Required fields are missing or invalid",
-			Errors:  err.Error(),
-		})
-		return
-	}
-
-	if len(party.Players) >= party.Settings.MaxPlayers {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
-			Message: "The party is full",
-		})
-		return
-	}
-
+	join := ctx.MustGet("body").(request.JoinParty)
 	player := ctx.MustGet("player").(response.Player)
 
-	_, err := cache.Get(player.Hash())
+	item, err := cache.Get(join.Secret)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
+		return
 	}
+
+	var party response.Party
+	json.Unmarshal(item.Value, &party)
 
 	party.Add(player)
 
@@ -61,5 +49,4 @@ func JoinParty(ctx *gin.Context, cache *memcache.Client) {
 	cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
-	loggedInTotal.WithLabelValues("v1").Inc()
 }

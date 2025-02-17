@@ -3,7 +3,6 @@ package endpoints
 import (
 	"encoding/json"
 	"errors"
-	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
@@ -32,15 +31,6 @@ var (
 //	@Router		/party/create [post]
 //	@Security	ApiKeyAuth
 func CreateParty(ctx *gin.Context, cache *memcache.Client) {
-	var settings request.Settings
-	if err := ctx.Bind(&settings); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Required fields are missing or invalid",
-			Errors:  err.Error(),
-		})
-		return
-	}
-
 	player := ctx.MustGet("player").(response.Player)
 
 	_, err := cache.Get(player.Hash())
@@ -54,17 +44,14 @@ func CreateParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
-	party := response.NewParty(player, &settings)
+	party := response.NewParty(player)
 
-	// We are using redis for the regular mapping and for
-	// the ability of scaling horizontally without losing
-	// data if containers are scaled down
-	//
-	// Mapping: Party ID -> Party struct
 	bytes, _ := json.Marshal(party)
 	cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
+	cache.Set(&memcache.Item{Key: party.JoinSecret, Value: bytes})
 
-	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 	partyCountTotal.WithLabelValues("v1").Inc()
 	loggedInTotal.WithLabelValues("v1").Inc()
+	
+	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 }
