@@ -19,7 +19,6 @@ import (
 //	@Router		/party [get]
 //	@Security	ApiKeyAuth
 func GetParty(ctx *gin.Context, cache *memcache.Client) {
-	var party response.Party
 	player := ctx.MustGet("player").(response.Player)
 
 	item, err := cache.Get(player.Hash())
@@ -30,6 +29,7 @@ func GetParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
+	var party response.Party
 	json.Unmarshal(item.Value, &party)
 
 	ctx.AbortWithStatusJSON(http.StatusOK, party)

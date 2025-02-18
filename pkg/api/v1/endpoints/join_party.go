@@ -41,6 +41,18 @@ func JoinParty(ctx *gin.Context, cache *memcache.Client) {
 	}
 
 	var party response.Party
+
+	// If the player is already in a party, publish a party
+	// update event to all members
+	currentItem, err := cache.Get(player.Hash())
+	if currentItem != nil {
+		json.Unmarshal(currentItem.Value, &party)
+
+		party.Remove(player)
+		flow.PublishAsync(party.JoinSecret, party)
+	}
+
+	// Use the same party object to retrieve the requested party
 	json.Unmarshal(item.Value, &party)
 
 	party.Add(player)

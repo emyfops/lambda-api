@@ -41,4 +41,5 @@ func Register(cache *memcache.Client, router *gin.Engine) {
 	v1.PUT("/party/leave", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.LeaveParty))
 	v1.DELETE("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.DeleteParty))
 	v1.GET("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.GetParty))
+	v1.GET("/party/listen", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.PartyListen))
 }

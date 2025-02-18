@@ -20,7 +20,6 @@ import (
 //	@Router		/party/delete [delete]
 //	@Security	ApiKeyAuth
 func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
-	var party response.Party
 	player := ctx.MustGet("player").(response.Player)
 
 	item, err := cache.Get(player.Hash())
@@ -31,6 +30,7 @@ func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
+	var party response.Party
 	json.Unmarshal(item.Value, &party)
 
 	if party.Leader != player {
@@ -39,6 +39,9 @@ func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 		})
 		return
 	}
+
+	party.Remove(player)
+	flow.PublishAsync(party.JoinSecret, party)
 
 	cache.Delete(player.Hash())
 	cache.Delete(party.JoinSecret)
