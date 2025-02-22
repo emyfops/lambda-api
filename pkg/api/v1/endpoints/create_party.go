@@ -24,7 +24,6 @@ var (
 //	@Tags		Party
 //	@Accept		json
 //	@Produce	json
-//	@Param		settings	body		request.Settings	false	"Party configuration"
 //	@Success	201			{object}	response.Party
 //	@Failure	400			{object}	response.ValidationError
 //	@Failure	409			{object}	response.Error
