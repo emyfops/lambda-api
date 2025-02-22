@@ -4,7 +4,6 @@ import (
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/endpoints"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/middlewares"
-	"github.com/Edouard127/lambda-api/pkg/api/v1/models/request"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +36,7 @@ func Register(cache *memcache.Client, router *gin.Engine) {
 
 	// Party endpoints
 	v1.POST("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.CreateParty))
-	v1.PUT("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, middlewares.Body[request.JoinParty], internal.With(cache, endpoints.JoinParty))
+	v1.PUT("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.JoinParty))
 	v1.PUT("/party/leave", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.LeaveParty))
 	v1.DELETE("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.DeleteParty))
 	v1.GET("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.GetParty))
