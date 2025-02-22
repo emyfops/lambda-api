@@ -20,17 +20,17 @@ import (
 //	@Router		/party/delete [delete]
 //	@Security	ApiKeyAuth
 func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
-	var party response.Party
 	player := ctx.MustGet("player").(response.Player)
 
 	item, err := cache.Get(player.Hash())
-	if err != nil { // todo: change this
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
 		return
 	}
 
+	var party response.Party
 	json.Unmarshal(item.Value, &party)
 
 	if party.Leader != player {
@@ -40,9 +40,14 @@ func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
-	cache.Delete(player.Hash())
+	party.Remove(player)
+	flow.PublishAsync(party.JoinSecret, party)
 
-	ctx.AbortWithStatus(http.StatusNoContent)
+	cache.Delete(player.Hash())
+	cache.Delete(party.JoinSecret)
+
 	partyCountTotal.WithLabelValues("v1").Dec()
 	loggedInTotal.WithLabelValues("v1").Sub(float64(len(party.Players)))
+
+	ctx.AbortWithStatus(http.StatusNoContent)
 }

@@ -51,6 +51,7 @@ func main() {
 
 	// Prevent panics from crashing the server
 	router.Use(gin.Recovery())
+	router.Use(gin.Logger())
 
 	// Register the APIs
 	global.Register(router)

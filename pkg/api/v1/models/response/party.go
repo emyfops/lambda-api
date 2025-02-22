@@ -1,48 +1,42 @@
 package response
 
 import (
+	"encoding/json"
 	"github.com/Edouard127/lambda-api/internal"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/google/uuid"
 	"time"
 )
 
 // Party represents a lobby of players
 type Party struct {
-	// The ID of the party.
-	// It is a random UUID.
+	// The ID of the party
+	// 	It's a random UUID
 	ID uuid.UUID `json:"id" redis:"id"`
 
-	// The join secret of the party.
-	// It is a random string of 100 characters.
-	JoinSecret string `json:"join_secret" redis:"join_secret"`
+	// The join secret of the party
+	// 	example: "RzTMeBHZu3VoNEUpNQFSnMYpSNQgWQ2rYM4u3RHSPQIacMxE4KH63OYQEDAD0P0bnjZBYUFHB0I5wOx2xEiXOU9SKBxRZ5YcvYjjiZWhsGGss3vnRajvFn4trJgTnvz2"
+	JoinSecret string `json:"join_secret"`
 
-	// The leader of the party.
-	Leader Player `json:"leader" redis:"leader"`
+	// The leader of the party
+	Leader Player `json:"leader"`
 
-	// The creation date of the party.
-	// example: 2021-10-10T12:00:00Z
-	Creation time.Time `json:"creation" redis:"creation"`
+	// The creation date of the party
+	// 	example: 2021-10-10T12:00:00Z
+	Creation time.Time `json:"creation"`
 
-	// The list of players in the party.
-	Players []Player `json:"players" redis:"players"`
-
-	// The settings of the party.
-	Settings Settings `json:"settings" redis:"settings"`
+	// The list of players in the party
+	Players []Player `json:"players"`
 }
 
-// NewParty returns a new party with the given leader and settings.
-func NewParty(leader Player, settings *Settings) *Party {
-	if settings == nil {
-		settings = DefaultSettings
-	}
-
+// NewParty returns a new party with the given leader
+func NewParty(leader Player) *Party {
 	return &Party{
 		ID:         uuid.New(),
-		JoinSecret: internal.RandString(100),
+		JoinSecret: internal.RandString(128),
 		Leader:     leader,
 		Creation:   time.Now(),
 		Players:    []Player{leader},
-		Settings:   *settings,
 	}
 }
 
@@ -56,5 +50,13 @@ func (pt *Party) Remove(player Player) {
 			pt.Players = append(pt.Players[:i], pt.Players[i+1:]...)
 			return
 		}
+	}
+}
+
+func (pt *Party) Update(cache *memcache.Client) {
+	bytes, _ := json.Marshal(pt)
+
+	for _, player := range pt.Players {
+		cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
 	}
 }

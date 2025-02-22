@@ -22,16 +22,17 @@ var loggedInTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
 //	@Tags		Party
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	body		string	true	"Party ID"
+//	@Param		id	body		request.JoinParty	true	"Party ID"
 //	@Success	202	{object}	response.Party
 //	@Failure	400	{object}	response.ValidationError
 //	@Failure	404	{object}	response.Error
 //	@Router		/party/join [put]
 //	@Security	ApiKeyAuth
 func JoinParty(ctx *gin.Context, cache *memcache.Client) {
-	var party response.Party
 	var join request.JoinParty
-	if err := ctx.Bind(&join); err != nil {
+
+	err := ctx.Bind(&join)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",
 			Errors:  err.Error(),
@@ -39,21 +40,37 @@ func JoinParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
-	if len(party.Players) >= party.Settings.MaxPlayers {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, response.Error{
-			Message: "The party is full",
-		})
-		return
-	}
-
 	player := ctx.MustGet("player").(response.Player)
 
-	_, err := cache.Get(player.Hash())
+	item, err := cache.Get(join.Secret)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "The party does not exist",
 		})
+		return
 	}
+
+	var party response.Party
+
+	// If the player is already in a party, publish a party
+	// update event to all members and leave it
+	currentItem, err := cache.Get(player.Hash())
+	if currentItem != nil {
+		// Close the channel if the player has subscribed to the party events
+		channel, ok := subscriptions[player]
+		if ok {
+			close(channel)
+		}
+
+		party.Remove(player)
+		party.Update(cache)
+
+		json.Unmarshal(currentItem.Value, &party)
+		flow.PublishAsync(party.JoinSecret, party)
+	}
+
+	// Use the same party object to retrieve the requested party
+	json.Unmarshal(item.Value, &party)
 
 	party.Add(player)
 
@@ -61,5 +78,4 @@ func JoinParty(ctx *gin.Context, cache *memcache.Client) {
 	cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
 
 	ctx.AbortWithStatusJSON(http.StatusAccepted, party)
-	loggedInTotal.WithLabelValues("v1").Inc()
 }

@@ -1,10 +1,6 @@
 package request
 
 type Authentication struct {
-	// The player's authentication Discord token.
-	// example: OTk1MTU1NzcyMzYxMTQ2NDM4
-	Token string `json:"token" form:"token" xml:"token" binding:"required"`
-
 	// The player's username.
 	// example: Notch
 	Username string `json:"username" form:"username" xml:"username" binding:"required"`

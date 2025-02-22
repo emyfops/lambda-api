@@ -26,7 +26,7 @@ var (
 // Login godoc
 //
 //	@Summary		Login to the server
-//	@Description	Login to the server using a Discord identify token, a Minecraft username and a Mojang session hash
+//	@Description	Login to the server using a Minecraft username and a Mojang session hash
 //	@Tags			Authentication
 //	@Accept			json
 //	@Produce		json
@@ -35,11 +35,12 @@ var (
 //	@Failure		400		{object}	response.ValidationError
 //	@Failure		401		{object}	response.Error
 //	@Failure		500		{object}	response.Error
-//	@Router			/party/login [post]
+//	@Router			/login 	[post]
 func Login(ctx *gin.Context) {
 	var login request.Authentication
-	if err := ctx.Bind(&login); err != nil {
-		failedLogins.WithLabelValues("v1").Inc()
+
+	err := ctx.Bind(&login)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",
 			Errors:  err.Error(),
@@ -47,7 +48,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	player, err := response.GetPlayer(login.Token, login.Username, login.Hash)
+	player, err := response.GetPlayer(login.Username, login.Hash)
 	if err != nil {
 		failedLogins.WithLabelValues("v1").Inc()
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
@@ -65,11 +66,11 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	successfulLogins.WithLabelValues("v1").Inc()
+
 	ctx.AbortWithStatusJSON(http.StatusOK, response.Authentication{
 		AccessToken: signed,
 		ExpiresIn:   int64(time.Hour * 24),
 		TokenType:   "Bearer",
 	})
-
-	successfulLogins.WithLabelValues("v1").Inc()
 }

@@ -15,20 +15,25 @@ var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account"
 
 type Player struct {
 	// The player's name.
-	// example: Notch
+	// 	example: Notch
 	Name string `json:"name"`
 
 	// The player's UUID.
-	// example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
+	// 	example: 069a79f4-44e9-4726-a5be-fca90e38aaf5
 	UUID uuid.UUID `json:"id"`
 
 	// The player's Discord ID.
-	// example: "385441179069579265"
+	// 	example: 385441179069579265
 	DiscordID string `json:"discord_id"`
 
 	// Whether the player is marked as unsafe.
-	// example: true
+	// 	example: true
 	Unsafe bool `json:"unsafe"`
+}
+
+// HasDiscord returns whether the player has linked their discord account or not
+func (pl *Player) HasDiscord() bool {
+	return pl.DiscordID != ""
 }
 
 // Hash returns a memcached compliant unique identifier
@@ -37,8 +42,6 @@ func (pl *Player) Hash() string {
 	sha.Write([]byte(pl.Name))
 	sha.Write([]byte(pl.UUID.String()))
 	sha.Write([]byte(pl.DiscordID))
-
-	// TODO: Can this be exploited with two different instances online and offline ?
 
 	return string(sha.Sum(nil))
 }
@@ -55,17 +58,14 @@ type sharedPlayer struct {
 }
 
 // GetPlayer returns a new player with the given name, hash and token.
-func GetPlayer(token, name, hash string) (pl Player, err error) {
+func GetPlayer(name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
-		flag.Lookup("insecure") != nil {
-		// If the Minecraft account is invalid, we can still try to authenticate the player with Discord.
+		flag.Lookup("insecure").Value.String() == "true" {
 		pl.Unsafe = true
-	} else {
-		return
+		err = nil // Intercept error for insecure instances
 	}
 
-	err = GetDiscord(token, &pl)
 	return
 }
 
