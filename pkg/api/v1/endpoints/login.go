@@ -37,7 +37,16 @@ var (
 //	@Failure		500		{object}	response.Error
 //	@Router			/login 	[post]
 func Login(ctx *gin.Context) {
-	login := ctx.MustGet("body").(request.Authentication)
+	var login request.Authentication
+
+	err := ctx.Bind(&login)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
+		})
+		return
+	}
 
 	player, err := response.GetPlayer(login.Username, login.Hash)
 	if err != nil {

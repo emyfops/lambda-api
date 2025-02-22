@@ -15,17 +15,27 @@ import (
 //	@Tags		Authentication
 //	@Accept 	json
 //	@Produce	json
-//	@Param		login	body		request.DiscordLink		true
+//	@Param		login	body		request.DiscordLink		true	"Discord RPC oauth token"
 //	@Success	200		{object}	response.Authentication
 //	@Failure	400		{object}	response.ValidationError
 //	@Failure	401		{object}	response.Error
 //	@Failure	500		{object}	response.Error
 //	@Router		/link/discord 		[post]
 func LinkDiscord(ctx *gin.Context) {
-	player := ctx.MustGet("player").(response.Player)
-	link := ctx.MustGet("body").(request.DiscordLink)
+	var link request.DiscordLink
 
-	err := response.GetDiscord(link.Token, &player)
+	err := ctx.Bind(&link)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	player := ctx.MustGet("player").(response.Player)
+
+	err = response.GetDiscord(link.Token, &player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
 			Message: "Invalid discord token",

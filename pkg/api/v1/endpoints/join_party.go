@@ -22,14 +22,24 @@ var loggedInTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
 //	@Tags		Party
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	body		string	true	"Party ID"
+//	@Param		id	body		request.JoinParty	true	"Party ID"
 //	@Success	202	{object}	response.Party
 //	@Failure	400	{object}	response.ValidationError
 //	@Failure	404	{object}	response.Error
 //	@Router		/party/join [put]
 //	@Security	ApiKeyAuth
 func JoinParty(ctx *gin.Context, cache *memcache.Client) {
-	join := ctx.MustGet("body").(request.JoinParty)
+	var join request.JoinParty
+
+	err := ctx.Bind(&join)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
 	player := ctx.MustGet("player").(response.Player)
 
 	item, err := cache.Get(join.Secret)

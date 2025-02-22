@@ -32,8 +32,8 @@ func Register(cache *memcache.Client, router *gin.Engine) {
 	v1 := router.Group("/api/v1")
 
 	// Login endpoints
-	v1.POST("/login", middlewares.Body[request.Authentication], endpoints.Login)
-	v1.POST("/link/discord", middlewares.CheckAuth, middlewares.Body[request.DiscordLink], endpoints.LinkDiscord)
+	v1.POST("/login", endpoints.Login)
+	v1.POST("/link/discord", middlewares.CheckAuth, endpoints.LinkDiscord)
 
 	// Party endpoints
 	v1.POST("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.CreateParty))
