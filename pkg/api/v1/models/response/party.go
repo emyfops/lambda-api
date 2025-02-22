@@ -1,7 +1,9 @@
 package response
 
 import (
+	"encoding/json"
 	"github.com/Edouard127/lambda-api/internal"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/google/uuid"
 	"time"
 )
@@ -48,5 +50,13 @@ func (pt *Party) Remove(player Player) {
 			pt.Players = append(pt.Players[:i], pt.Players[i+1:]...)
 			return
 		}
+	}
+}
+
+func (pt *Party) Update(cache *memcache.Client) {
+	bytes, _ := json.Marshal(pt)
+
+	for _, player := range pt.Players {
+		cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
 	}
 }

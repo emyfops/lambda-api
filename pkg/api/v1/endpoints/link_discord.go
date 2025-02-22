@@ -22,16 +22,9 @@ import (
 //	@Failure	500		{object}	response.Error
 //	@Router		/link/discord 		[post]
 func LinkDiscord(ctx *gin.Context) {
-	var link request.DiscordLink
-	if err := ctx.Bind(&link); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Required fields are missing or invalid",
-			Errors:  err.Error(),
-		})
-		return
-	}
-
 	player := ctx.MustGet("player").(response.Player)
+	link := ctx.MustGet("body").(request.DiscordLink)
+
 	err := response.GetDiscord(link.Token, &player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
@@ -43,7 +36,7 @@ func LinkDiscord(ctx *gin.Context) {
 	signed, err := internal.NewJwt(player)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Failed to create token",
+			Message: "Failed to create the token",
 		})
 		return
 	}

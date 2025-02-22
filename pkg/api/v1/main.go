@@ -32,12 +32,12 @@ func Register(cache *memcache.Client, router *gin.Engine) {
 	v1 := router.Group("/api/v1")
 
 	// Login endpoints
-	v1.POST("/login", middlewares.BodyRequest[request.Authentication], endpoints.Login)
-	v1.POST("/link/discord", middlewares.CheckAuth, endpoints.LinkDiscord)
+	v1.POST("/login", middlewares.Body[request.Authentication], endpoints.Login)
+	v1.POST("/link/discord", middlewares.CheckAuth, middlewares.Body[request.DiscordLink], endpoints.LinkDiscord)
 
 	// Party endpoints
 	v1.POST("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.CreateParty))
-	v1.PUT("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, middlewares.BodyRequest[request.JoinParty], internal.With(cache, endpoints.JoinParty))
+	v1.PUT("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, middlewares.Body[request.JoinParty], internal.With(cache, endpoints.JoinParty))
 	v1.PUT("/party/leave", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.LeaveParty))
 	v1.DELETE("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.DeleteParty))
 	v1.GET("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.GetParty))

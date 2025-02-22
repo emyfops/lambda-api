@@ -13,9 +13,9 @@ var failedBodies = promauto.NewCounter(prometheus.CounterOpts{
 	Help: "Total number of failed request with a defined body",
 })
 
-// BodyRequest takes in a struct of type T and binds it to the request body
-// and puts the data into the context keys
-func BodyRequest[T any](ctx *gin.Context) {
+// Body takes in a struct of type T and binds it to the request body
+// and puts the data in the context keys as `body`
+func Body[T any](ctx *gin.Context) {
 	var body T
 
 	err := ctx.Bind(&body)

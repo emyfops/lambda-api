@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+var subscriptions = make(map[response.Player]eventbus.EventChannel)
 var flow = eventbus.NewEventBus()
 
 func PartyListen(ctx *gin.Context, cache *memcache.Client) {
@@ -30,15 +31,16 @@ func PartyListen(ctx *gin.Context, cache *memcache.Client) {
 	ctx.Writer.Header().Set("Cache-Control", "no-cache")
 	ctx.Writer.Header().Set("Connection", "keep-alive")
 
-	partyChannel := flow.Subscribe("1")
+	partyChannel := flow.Subscribe(party.JoinSecret)
+	subscriptions[player] = partyChannel
 
 	for {
-		event := <-partyChannel
+		event, ok := <-partyChannel
+		if !ok {
+			return
+		}
 
-		//newParty := event.Data.(response.Party)
-		ctx.SSEvent("1", event)
-
-		// Flush the data immediately instead of buffering it for later.
+		ctx.SSEvent("data", event.Data)
 		ctx.Writer.Flush()
 	}
 }

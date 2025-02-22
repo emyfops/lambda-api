@@ -34,10 +34,7 @@ func CreateParty(ctx *gin.Context, cache *memcache.Client) {
 	player := ctx.MustGet("player").(response.Player)
 
 	_, err := cache.Get(player.Hash())
-	if !errors.Is(err, memcache.ErrCacheMiss) && err != nil {
-		// We should only check against memcache.ErrCacheMiss
-		// If we get another error it most likely means that something went wrong, either the
-		// cache is acting up, or the party was lost and needs to be recreated
+	if !errors.Is(err, memcache.ErrCacheMiss) {
 		ctx.AbortWithStatusJSON(http.StatusConflict, response.Error{
 			Message: "You are already in a party",
 		})
@@ -52,6 +49,6 @@ func CreateParty(ctx *gin.Context, cache *memcache.Client) {
 
 	partyCountTotal.WithLabelValues("v1").Inc()
 	loggedInTotal.WithLabelValues("v1").Inc()
-	
+
 	ctx.AbortWithStatusJSON(http.StatusCreated, party)
 }
