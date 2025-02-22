@@ -12,7 +12,7 @@ import (
 )
 
 var loggedInTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
-	Name: "lambda_rpc_logged_in_users",
+	Name: "lambda_api_logged_in_users",
 	Help: "Total number of logged in users",
 }, []string{"version"})
 
