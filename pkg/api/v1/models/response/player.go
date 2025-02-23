@@ -2,6 +2,7 @@ package response
 
 import (
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -32,21 +33,21 @@ type Player struct {
 }
 
 // HasDiscord returns whether the player has linked their discord account or not
-func (pl *Player) HasDiscord() bool {
+func (pl Player) HasDiscord() bool {
 	return pl.DiscordID != ""
 }
 
-// Hash returns a memcached compliant unique identifier
-func (pl *Player) Hash() string {
+// Hash returns a memcached compliant unique identifier in base64 format
+func (pl Player) Hash() string {
 	sha := sha1.New()
 	sha.Write([]byte(pl.Name))
 	sha.Write([]byte(pl.UUID.String()))
 	sha.Write([]byte(pl.DiscordID))
 
-	return string(sha.Sum(nil))
+	return base64.StdEncoding.EncodeToString(sha.Sum(nil))
 }
 
-func (pl *Player) String() string {
+func (pl Player) String() string {
 	return fmt.Sprintf("Player{Name: %s, UUID: %s, DiscordID: %s, Unsafe: %t}", pl.Name, pl.UUID, pl.DiscordID, pl.Unsafe)
 }
 

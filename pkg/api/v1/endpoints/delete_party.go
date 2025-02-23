@@ -22,8 +22,8 @@ import (
 func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 	player := ctx.MustGet("player").(response.Player)
 
-	item, err := cache.Get(player.Hash())
-	if err != nil {
+	item, _ := cache.Get(player.Hash())
+	if item == nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
@@ -40,8 +40,7 @@ func DeleteParty(ctx *gin.Context, cache *memcache.Client) {
 		return
 	}
 
-	party.Remove(player)
-	flow.PublishAsync(party.JoinSecret, party)
+	flow.PublishAsync(party.JoinSecret, nil) // Throw an exception on the client to catch as null
 
 	cache.Delete(player.Hash())
 	cache.Delete(party.JoinSecret)

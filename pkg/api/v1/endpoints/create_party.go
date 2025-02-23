@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
@@ -32,11 +31,17 @@ var (
 func CreateParty(ctx *gin.Context, cache *memcache.Client) {
 	player := ctx.MustGet("player").(response.Player)
 
-	_, err := cache.Get(player.Hash())
-	if !errors.Is(err, memcache.ErrCacheMiss) {
-		ctx.AbortWithStatusJSON(http.StatusConflict, response.Error{
-			Message: "You are already in a party",
-		})
+	item, _ := cache.Get(player.Hash())
+	if item != nil {
+		var party response.Party
+		json.Unmarshal(item.Value, &party)
+
+		if party.Leader == player {
+			DeleteParty(ctx, cache)
+		} else {
+			LeaveParty(ctx, cache)
+		}
+
 		return
 	}
 

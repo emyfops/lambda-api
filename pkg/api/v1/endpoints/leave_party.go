@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
@@ -22,8 +21,8 @@ import (
 func LeaveParty(ctx *gin.Context, cache *memcache.Client) {
 	player := ctx.MustGet("player").(response.Player)
 
-	item, err := cache.Get(player.Hash())
-	if errors.Is(err, memcache.ErrCacheMiss) {
+	item, _ := cache.Get(player.Hash())
+	if item == nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})

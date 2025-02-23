@@ -15,8 +15,8 @@ var flow = eventbus.NewEventBus()
 func PartyListen(ctx *gin.Context, cache *memcache.Client) {
 	player := ctx.MustGet("player").(response.Player)
 
-	item, err := cache.Get(player.Hash())
-	if err != nil {
+	item, _ := cache.Get(player.Hash())
+	if item == nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})

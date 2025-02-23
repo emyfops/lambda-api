@@ -54,7 +54,7 @@ func JoinParty(ctx *gin.Context, cache *memcache.Client) {
 
 	// If the player is already in a party, publish a party
 	// update event to all members and leave it
-	currentItem, err := cache.Get(player.Hash())
+	currentItem, _ := cache.Get(player.Hash())
 	if currentItem != nil {
 		// Close the channel if the player has subscribed to the party events
 		channel, ok := subscriptions[player]
