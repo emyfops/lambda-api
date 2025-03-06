@@ -61,7 +61,7 @@ func GetCape(ctx *gin.Context, cache memcached.Client) {
 		return
 	}
 	if errors.Is(err, memcached.ErrNotFound) {
-		logger.Error("Server tried to get a cape that does not exist", zap.String("id", id))
+		logger.Error("Client tried to get a cape that does not exist", zap.String("id", id))
 
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "This player does not have a cape.",

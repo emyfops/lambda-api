@@ -1,0 +1,90 @@
+@host = localhost:8080
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWUiOiJ0ZXN0X3VzZXIxIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJkaXNjb3JkX2lkIjoiMDAwMDAwMDAwMDAwMDAwMDAxIiwidW5zYWZlIjpmYWxzZX0sImV4cCI6MjE0MTM4MDcwNCwiaWF0IjoxNzQxMjk0MzA0LCJuYmYiOjE3NDEyOTQzMDR9.VwctPUX2DzgsBnVxmlrtwexlPj3OQP4d0suGXttB6Mw
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWUiOiJ0ZXN0X3VzZXIyIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJkaXNjb3JkX2lkIjoiMDAwMDAwMDAwMDAwMDAwMDAyIiwidW5zYWZlIjpmYWxzZX0sImV4cCI6MjE0MTM4MDcwNCwiaWF0IjoxNzQxMjk0MzA0LCJuYmYiOjE3NDEyOTQzMDR9.dyzi3eHRC2xB3nNmZKIuBjDvwBh4ADFP3F89Zvv2wFk
+
+### Create party
+POST http://{{host}}/api/v1/party/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 201, "Response status is not 201");
+%}
+
+### Leave party
+PUT http://{{host}}/api/v1/party/leave
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 202, "Response status is not 202");
+%}
+
+### Create party
+POST http://{{host}}/api/v1/party/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 201, "Response status is not 201");
+    client.global.set("join", response.body.join_secret)
+%}
+
+### Get party
+GET http://{{host}}/api/v1/party
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 200, "Response status is not 200");
+%}
+
+### Join party
+PUT http://{{host}}/api/v1/party/join
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+
+{
+  "secret": "{{join}}"
+}
+
+> {%
+    client.assert(response.status === 202, "Response status is not 202");
+%}
+
+### Get party
+GET http://{{host}}/api/v1/party
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+
+> {%
+    client.assert(response.status === 200, "Response status is not 200");
+%}
+
+### Delete party
+DELETE http://{{host}}/api/v1/party/delete
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 204, "Response status is not 204");
+%}
+
+### Set player cape
+PUT http://{{host}}/api/v1/cape?
+    id=galaxy
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.assert(response.status === 200, "Response status is not 200");
+%}
+
+### Get player cape
+GET http://localhost:8080/api/v1/cape?
+    id=00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+> {%
+    client.assert(response.status === 200, "Response status is not 200");
+%}

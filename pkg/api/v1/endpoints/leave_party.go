@@ -44,6 +44,11 @@ func LeaveParty(ctx *gin.Context, cache memcached.Client) {
 	var party response.Party
 	json.Unmarshal(item.Value, &party)
 
+	if player == party.Leader {
+		DeleteParty(ctx, cache)
+		return
+	}
+
 	// Close the channel if the player has subscribed to the party events
 	channel, ok := subscriptions[player]
 	if ok {
