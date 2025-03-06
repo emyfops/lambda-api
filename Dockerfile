@@ -1,4 +1,4 @@
-FROM golang:1.23.7-alpine as builder
+FROM golang:1.24.1-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -9,8 +9,9 @@ COPY go.* ./
 # Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the source code
+# Copy the source code and the swagger
 COPY . ./
+COPY api ./api
 
 # Build the application
 RUN go build -o main .

@@ -66,7 +66,9 @@ func main() {
 	global.Register(router)
 	v1.Register(router, mem, dragon)
 
-	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
+	if isDebug {
+		router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
+	}
 
 	err = router.Run(":8080")
 	if err != nil {
