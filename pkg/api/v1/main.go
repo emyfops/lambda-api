@@ -4,8 +4,8 @@ import (
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/endpoints"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/middlewares"
-	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
+	"github.com/yeqown/memcached"
 )
 
 // Register godoc
@@ -27,12 +27,12 @@ import (
 //	@In							header
 //	@Name						Authorization
 //	@Description				Type "Bearer" followed by a space and JWT token.
-func Register(cache *memcache.Client, router *gin.Engine) {
+func Register(router *gin.Engine, cache memcached.Client, persistent memcached.Client) {
 	v1 := router.Group("/api/v1")
 
 	// Login endpoints
 	v1.POST("/login", endpoints.Login)
-	v1.POST("/link/discord", middlewares.CheckAuth, endpoints.LinkDiscord)
+	v1.POST("/link/discord", middlewares.CheckAuth, internal.With(cache, endpoints.LinkDiscord))
 
 	// Party endpoints
 	v1.POST("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.CreateParty))
@@ -41,4 +41,8 @@ func Register(cache *memcache.Client, router *gin.Engine) {
 	v1.DELETE("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.DeleteParty))
 	v1.GET("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.GetParty))
 	v1.GET("/party/listen", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.PartyListen))
+
+	// Cape endpoints
+	v1.GET("/cape", internal.With(persistent, endpoints.GetCape))
+	v1.PUT("/cape", middlewares.CheckAuth, internal.With(persistent, endpoints.SetCape))
 }

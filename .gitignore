@@ -21,6 +21,4 @@
 go.work
 
 .idea/
-./api/*
-
-/openapi-spec
+/api/*

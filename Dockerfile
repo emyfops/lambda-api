@@ -1,4 +1,4 @@
-FROM golang:1.23.3-alpine as builder
+FROM golang:1.23.7-alpine as builder
 
 # Set the working directory
 WORKDIR /app
@@ -11,13 +11,6 @@ RUN go mod download
 
 # Copy the source code
 COPY . ./
-
-# Install swag
-RUN go get -v -u github.com/swaggo/swag/cmd/swag
-RUN go install github.com/swaggo/swag/cmd/swag
-
-# Run generators
-RUN go generate ./...
 
 # Build the application
 RUN go build -o main .
@@ -34,7 +27,7 @@ RUN set +x \
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main /app/
 
-# Expose port 80 and 9100 for the web and metrics
+# Expose port 8080 and 9100 for the web and metrics
 EXPOSE 8080
 EXPOSE 9100
 

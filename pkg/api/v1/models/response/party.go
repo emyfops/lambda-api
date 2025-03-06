@@ -1,10 +1,11 @@
 package response
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/Edouard127/lambda-api/internal"
-	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/google/uuid"
+	"github.com/yeqown/memcached"
 	"time"
 )
 
@@ -30,8 +31,8 @@ type Party struct {
 }
 
 // NewParty returns a new party with the given leader
-func NewParty(leader Player) *Party {
-	return &Party{
+func NewParty(leader Player) Party {
+	return Party{
 		ID:         uuid.New(),
 		JoinSecret: internal.RandString(128),
 		Leader:     leader,
@@ -53,10 +54,10 @@ func (pt *Party) Remove(player Player) {
 	}
 }
 
-func (pt *Party) Update(cache *memcache.Client) {
+func (pt *Party) Update(cache memcached.Client) {
 	bytes, _ := json.Marshal(pt)
 
 	for _, player := range pt.Players {
-		cache.Set(&memcache.Item{Key: player.Hash(), Value: bytes})
+		cache.Set(context.Background(), player.Hash(), bytes, 0, 0)
 	}
 }
