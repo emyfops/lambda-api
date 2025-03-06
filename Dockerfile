@@ -1,19 +1,12 @@
 FROM golang:1.24.1-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum files
 COPY go.* ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the source code and the swagger
 COPY . ./
-COPY api ./api
-
-# Build the application
 RUN go build -o main .
 
 # Use the official Alpine image for a lean production container
@@ -28,9 +21,7 @@ RUN set +x \
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main /app/
 
-# Expose port 8080 and 9100 for the web and metrics
 EXPOSE 8080
 EXPOSE 9100
 
-# Run the server
 CMD ["/app/main"]

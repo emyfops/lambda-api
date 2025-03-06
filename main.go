@@ -3,15 +3,12 @@
 package main
 
 import (
-	_ "github.com/Edouard127/lambda-api/api" // Required for swagger documentation
 	"github.com/Edouard127/lambda-api/pkg/api/global"
 	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	flag "github.com/spf13/pflag"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/yeqown/memcached"
 	"go.uber.org/zap"
 	"net/http"
@@ -65,10 +62,6 @@ func main() {
 
 	global.Register(router)
 	v1.Register(router, mem, dragon)
-
-	if isDebug {
-		router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
-	}
 
 	err = router.Run(":8080")
 	if err != nil {
