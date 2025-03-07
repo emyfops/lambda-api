@@ -48,9 +48,11 @@ func main() {
 
 	go startPrometheus(logger)
 
+	if isDebug {
+		router.Use(gin.Logger())
+	}
 	router.Use(middlewares.PrometheusMiddleware())
 	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
 	router.Use(middlewares.Logger(logger))
 
 	global.Register(router)
