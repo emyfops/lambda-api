@@ -62,7 +62,7 @@ type sharedPlayer struct {
 func GetPlayer(name, hash string) (pl Player, err error) {
 	err = GetMinecraft(name, hash, &pl)
 	if errors.Is(err, ErrCouldNotVerifyMinecraft) &&
-		flag.Lookup("insecure").Value.String() == "true" {
+		flag.Lookup("online").Value.String() == "false" {
 		pl.Unsafe = true
 		err = nil // Intercept error for insecure instances
 	}
@@ -74,10 +74,9 @@ func GetPlayer(name, hash string) (pl Player, err error) {
 //
 //	This function proves the authenticity of a Minecraft username by checking
 //	the session hash provided by the client. The hash originally comes from
-//	the server and is generated using the Yggdrasil Public Key.	This is not à
-//	the most secure way of authenticating users since the hash is susceptible to replay attacks.
-//	However, it is the only way to authenticate users without requesting access
-//	to their Microsoft account.
+//	the server and is generated using the Yggdrasil Public Key.
+//	This is not the most secure way of authenticating users since the hash is susceptible to replay attacks.
+//	However, it is the only way to authenticate users without requesting access to their Microsoft account.
 func GetMinecraft(name, hash string, player *Player) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=%s&serverId=%s", name, hash), nil)
 	if err != nil {

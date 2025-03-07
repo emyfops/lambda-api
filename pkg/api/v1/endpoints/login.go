@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -23,20 +24,21 @@ var (
 	}, []string{"version"})
 )
 
-// Login godoc
+// Login allows a player to log in to the server using a Minecraft username and Mojang session hash.
 //
-//	@Summary		Login to the server
-//	@Description	Login to the server using a Minecraft username and a Mojang session hash
-//	@Tags			Authentication
-//	@Accept			json
-//	@Produce		json
-//	@Param			login	body		request.Authentication	true	"Authentication"
-//	@Success		200		{object}	response.Authentication
-//	@Failure		400		{object}	response.ValidationError
-//	@Failure		401		{object}	response.Error
-//	@Failure		500		{object}	response.Error
-//	@Router			/login 	[post]
+//	@Summary	Login to the server
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		login	body	request.Authentication	true	"Authentication credentials (Minecraft username and Mojang session hash)"
+//	@Success	200	{object}	response.Authentication		"Successfully logged in and retrieved authentication token"
+//	@Failure	400	{object}	response.ValidationError	"Invalid or missing authentication fields"
+//	@Failure	401	{object}	response.Error				"Invalid credentials"
+//	@Failure	500	{object}	response.Error				"Internal server error"
+//	@Router		/login [post]
 func Login(ctx *gin.Context) {
+	logger := ctx.MustGet("logger").(*zap.Logger)
+
 	var login request.Authentication
 
 	err := ctx.Bind(&login)
@@ -59,7 +61,9 @@ func Login(ctx *gin.Context) {
 
 	signed, err := internal.NewJwt(player)
 	if err != nil {
+		logger.Error("Error signing token", zap.Error(err))
 		failedLogins.WithLabelValues("v1").Inc()
+
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
 			Message: "Failed to create token",
 		})

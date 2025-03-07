@@ -1,65 +1,68 @@
-//go:generate swag i -g main.go -dir ./pkg/api/v1/ --instanceName v1 -o openapi-spec
+//go:generate swag i -g main.go -dir ./pkg/api/v1/ --instanceName v1 -o api
 
 package main
 
 import (
-	"flag"
-	_ "github.com/Edouard127/lambda-api/openapi-spec" // Required for swagger documentation
 	"github.com/Edouard127/lambda-api/pkg/api/global"
 	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
 	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
-	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	flag "github.com/spf13/pflag"
+	"github.com/yeqown/memcached"
 	"go.uber.org/zap"
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
-var _ = flag.Bool("insecure", false, "Insecure login")
-var mode = flag.String("staging", "debug", "Gin staging mode (info, debug, release)")
-var isDebug = flag.Bool("debug", true, "Enable debug log output")
-var cacheNodes []string // list of memcached instances
-
 func main() {
+	var isOnline bool
+	var isDebug bool
+	var staging string
+	var dragons []string
+
+	flag.BoolVar(&isOnline, "online", true, "Online-mode")
+	flag.StringVar(&staging, "staging", "debug", "Gin staging mode (info, debug, release)")
+	flag.BoolVar(&isDebug, "debug", true, "Enable debug log output")
+	flag.StringArrayVar(&dragons, "nodes", []string{}, "Memcache nodes")
+
 	flag.Parse()
-	cacheNodes = flag.Args()
 
 	var logger *zap.Logger
-	if *isDebug {
+	if isDebug {
 		logger = zap.Must(zap.NewDevelopment())
 	} else {
 		logger = zap.Must(zap.NewProduction())
 	}
 
 	printBuildInfo(logger)
+	go startPrometheus(logger)
 
-	mc := memcache.New(cacheNodes...)
-	if err := mc.Ping(); err != nil {
-		panic(err)
+	if !isOnline {
+		logger.Warn("Warning, running in offline mode allows users to spoof their authentication and usurpate other players")
 	}
 
-	gin.SetMode(*mode)
+	dragon, err := memcached.New(strings.Join(dragons, ","))
+	if err != nil {
+		logger.Fatal("Failed to connect to DragonFly", zap.Error(err))
+	}
+
+	gin.SetMode(staging)
 	router := gin.New()
 	router.SetTrustedProxies(nil)
 
-	// Setup metrics
+	if isDebug {
+		router.Use(gin.Logger())
+	}
 	router.Use(middlewares.PrometheusMiddleware())
-	go startPrometheus(logger)
-
-	// Prevent panics from crashing the server
 	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
+	router.Use(middlewares.Logger(logger))
 
-	// Register the APIs
 	global.Register(router)
+	v1.Register(router, dragon)
 
-	v1.Register(mc, router)
-	router.GET("/swagger/v1/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("v1")))
-
-	err := router.Run(":8080")
+	err = router.Run(":8080")
 	if err != nil {
 		logger.Fatal("Server listening error", zap.Error(err))
 	}

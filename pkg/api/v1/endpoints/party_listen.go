@@ -2,21 +2,43 @@ package endpoints
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/Edouard127/lambda-api/pkg/api/v1/models/response"
-	"github.com/bradfitz/gomemcache/memcache"
 	eventbus "github.com/dtomasi/go-event-bus/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/yeqown/memcached"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 var subscriptions = make(map[response.Player]eventbus.EventChannel)
 var flow = eventbus.NewEventBus()
 
-func PartyListen(ctx *gin.Context, cache *memcache.Client) {
+// PartyListen godoc
+//
+//	@Summary	Listen for party updates via SSE
+//	@Tags		Party
+//	@Accept		json
+//	@Produce	text/event-stream
+//	@Success	200	"Streaming party events"
+//	@Failure	404	{object}	response.Error	"You are not in a party"
+//	@Failure	500	{object}	response.Error	"Internal server error"
+//	@Router		/party/listen [get]
+//	@Security 	Bearer
+func PartyListen(ctx *gin.Context, cache memcached.Client) {
+	logger := ctx.MustGet("logger").(*zap.Logger)
 	player := ctx.MustGet("player").(response.Player)
 
-	item, _ := cache.Get(player.Hash())
-	if item == nil {
+	item, err := cache.Get(ctx.Request.Context(), player.Hash())
+	if !errors.Is(err, memcached.ErrNotFound) && err != nil {
+		logger.Error("Error getting party from cache", zap.Any("player", player), zap.Error(err))
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
+			Message: "Internal server error. Please try again later.",
+		})
+		return
+	}
+	if errors.Is(err, memcached.ErrNotFound) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "You are not in a party",
 		})
