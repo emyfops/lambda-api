@@ -17,11 +17,12 @@ import (
 )
 
 func main() {
+	var isOnline bool
 	var isDebug bool
 	var staging string
 	var dragons []string
 
-	flag.Bool("online", true, "Online-mode")
+	flag.BoolVar(&isOnline, "online", true, "Online-mode")
 	flag.StringVar(&staging, "staging", "debug", "Gin staging mode (info, debug, release)")
 	flag.BoolVar(&isDebug, "debug", true, "Enable debug log output")
 	flag.StringArrayVar(&dragons, "nodes", []string{}, "Memcache nodes")
@@ -36,6 +37,11 @@ func main() {
 	}
 
 	printBuildInfo(logger)
+	go startPrometheus(logger)
+
+	if !isOnline {
+		logger.Warn("Warning, running in offline mode allows users to spoof their authentication and usurpate other players")
+	}
 
 	dragon, err := memcached.New(strings.Join(dragons, ","))
 	if err != nil {
@@ -45,8 +51,6 @@ func main() {
 	gin.SetMode(staging)
 	router := gin.New()
 	router.SetTrustedProxies(nil)
-
-	go startPrometheus(logger)
 
 	if isDebug {
 		router.Use(gin.Logger())
