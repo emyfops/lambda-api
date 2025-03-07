@@ -27,7 +27,7 @@ import (
 //	@In							header
 //	@Name						Authorization
 //	@Description				Type "Bearer" followed by a space and JWT token.
-func Register(router *gin.Engine, cache memcached.Client, persistent memcached.Client) {
+func Register(router *gin.Engine, cache memcached.Client) {
 	v1 := router.Group("/api/v1")
 
 	// Login endpoints
@@ -43,6 +43,6 @@ func Register(router *gin.Engine, cache memcached.Client, persistent memcached.C
 	v1.GET("/party/listen", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, endpoints.PartyListen))
 
 	// Cape endpoints
-	v1.GET("/cape", internal.With(persistent, endpoints.GetCape))
-	v1.PUT("/cape", middlewares.CheckAuth, internal.With(persistent, endpoints.SetCape))
+	v1.GET("/cape", internal.With(cache, endpoints.GetCape))
+	v1.PUT("/cape", middlewares.CheckAuth, internal.With(cache, endpoints.SetCape))
 }

@@ -19,14 +19,12 @@ import (
 func main() {
 	var isDebug bool
 	var staging string
-	var memcaches []string
 	var dragons []string
 
 	flag.Bool("online", true, "Online-mode")
 	flag.StringVar(&staging, "staging", "debug", "Gin staging mode (info, debug, release)")
 	flag.BoolVar(&isDebug, "debug", true, "Enable debug log output")
-	flag.StringArrayVar(&memcaches, "memcache", []string{}, "Memcache nodes")
-	flag.StringArrayVar(&dragons, "dragon", []string{}, "Etcd nodes")
+	flag.StringArrayVar(&dragons, "nodes", []string{}, "Memcache nodes")
 
 	flag.Parse()
 
@@ -44,11 +42,6 @@ func main() {
 		logger.Fatal("Failed to connect to DragonFly", zap.Error(err))
 	}
 
-	mem, err := memcached.New(strings.Join(memcaches, ",")) // Temporary cache
-	if err != nil {
-		logger.Fatal("Failed to connect to Memcache", zap.Error(err))
-	}
-
 	gin.SetMode(staging)
 	router := gin.New()
 	router.SetTrustedProxies(nil)
@@ -61,7 +54,7 @@ func main() {
 	router.Use(middlewares.Logger(logger))
 
 	global.Register(router)
-	v1.Register(router, mem, dragon)
+	v1.Register(router, dragon)
 
 	err = router.Run(":8080")
 	if err != nil {
