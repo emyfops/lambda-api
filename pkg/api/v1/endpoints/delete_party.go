@@ -16,7 +16,7 @@ import (
 //	@Tags		Party
 //	@Accept		json
 //	@Produce	json
-//	@Success	204	"No content"
+//	@Success	200	"Ok"
 //	@Failure	403	{object}	response.Error	"You are not the leader of the party"
 //	@Failure	404	{object}	response.Error	"You are not in a party"
 //	@Failure	500	{object}	response.Error	"Internal server error"
@@ -77,5 +77,5 @@ func DeleteParty(ctx *gin.Context, cache memcached.Client) {
 	partyCountTotal.WithLabelValues("v1").Dec()
 	loggedInTotal.WithLabelValues("v1").Sub(float64(len(party.Players)))
 
-	ctx.AbortWithStatus(http.StatusNoContent)
+	ctx.AbortWithStatus(http.StatusOK)
 }

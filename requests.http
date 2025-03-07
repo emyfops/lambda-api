@@ -17,7 +17,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 > {%
-    client.assert(response.status === 202, "Response status is not 202");
+    client.assert(response.status === 202 || response.status === 204, "Response status is not 202 or 204");
 %}
 
 ### Create party

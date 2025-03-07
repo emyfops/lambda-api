@@ -16,7 +16,7 @@ import (
 //	@Tags		Party
 //	@Accept		json
 //	@Produce	json
-//	@Success	202	"No content"
+//	@Success	200	"Ok"
 //	@Failure	404	{object}	response.Error	"You are not in a party"
 //	@Failure	500	{object}	response.Error	"Internal server error"
 //	@Router		/party/leave [put]
@@ -63,5 +63,5 @@ func LeaveParty(ctx *gin.Context, cache memcached.Client) {
 	flow.PublishAsync(party.JoinSecret, party)
 
 	loggedInTotal.WithLabelValues("v1").Dec()
-	ctx.AbortWithStatus(http.StatusAccepted)
+	ctx.AbortWithStatus(http.StatusOK)
 }
