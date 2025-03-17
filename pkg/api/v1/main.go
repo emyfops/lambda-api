@@ -45,4 +45,7 @@ func Register(router *gin.Engine, cache memcached.Client) {
 	// Cape endpoints
 	v1.GET("/cape", internal.With(cache, endpoints.GetCape))
 	v1.PUT("/cape", middlewares.CheckAuth, internal.With(cache, endpoints.SetCape))
+
+	// Misc
+	v1.GET("/mappings", internal.With(cache, endpoints.GetMappings))
 }

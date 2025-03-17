@@ -10,12 +10,12 @@ import (
 
 var (
 	prometheusRequestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "lambda_rpc_requests_total",
+		Name: "lambda_api_requests_total",
 		Help: "Total number of requests",
 	}, []string{"path", "method", "status"})
 
 	prometheusRequestsDuration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "lambda_rpc_requests_duration",
+		Name:    "lambda_api_requests_duration",
 		Help:    "Duration of requests",
 		Buckets: prometheus.DefBuckets,
 	}, []string{"path", "method", "status"})
