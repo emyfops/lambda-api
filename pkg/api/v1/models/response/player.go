@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/google/uuid"
+	flag "github.com/spf13/pflag"
 	"io"
 	"net/http"
 )
