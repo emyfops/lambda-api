@@ -3,9 +3,9 @@
 package main
 
 import (
-	"github.com/Edouard127/lambda-api/pkg/api/global"
-	"github.com/Edouard127/lambda-api/pkg/api/global/middlewares"
-	v1 "github.com/Edouard127/lambda-api/pkg/api/v1"
+	"github.com/Edouard127/lambda-api/api"
+	"github.com/Edouard127/lambda-api/api/healthcheck"
+	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	flag "github.com/spf13/pflag"
@@ -45,7 +45,7 @@ func main() {
 
 	dragon, err := memcached.New(strings.Join(dragons, ","))
 	if err != nil {
-		logger.Fatal("Failed to connect to DragonFly", zap.Error(err))
+		logger.Fatal("Failed to connect to Memcache instances", zap.Error(err))
 	}
 
 	gin.SetMode(staging)
@@ -59,8 +59,8 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middlewares.Logger(logger))
 
-	global.Register(router)
-	v1.Register(router, dragon)
+	healthcheck.Register(router, dragon)
+	api.Register(router, dragon)
 
 	err = router.Run(":8080")
 	if err != nil {

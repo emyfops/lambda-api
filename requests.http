@@ -17,7 +17,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 > {%
-    client.assert(response.status === 202 || response.status === 204, "Response status is not 202 or 204");
+    client.assert(response.status === 200, "Response status is not 200");
 %}
 
 ### Create party
@@ -67,7 +67,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 > {%
-    client.assert(response.status === 204, "Response status is not 204");
+    client.assert(response.status === 200, "Response status is not 200");
 %}
 
 ### Set player cape
