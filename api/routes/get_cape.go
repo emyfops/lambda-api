@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Edouard127/lambda-api/api/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/yeqown/memcached"
 	"go.uber.org/zap"
 	"net/http"
@@ -33,6 +34,14 @@ func GetCape(ctx *gin.Context, cache memcached.Client) {
 		return
 	}
 
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.Error{
+			Message: "Invalid ID",
+		})
+		return
+	}
+
 	item, err := cache.Get(ctx.Request.Context(), id)
 	if !errors.Is(err, memcached.ErrNotFound) && err != nil {
 		logger.Error("Error getting player cape from cache", zap.String("id", id), zap.Error(err))
@@ -49,29 +58,9 @@ func GetCape(ctx *gin.Context, cache memcached.Client) {
 		return
 	}
 
-	capeId := string(item.Value)
-
-	item, err = cache.Get(ctx.Request.Context(), capeId)
-	if !errors.Is(err, memcached.ErrNotFound) && err != nil {
-		logger.Error("Error getting cape from cache", zap.String("id", id), zap.Error(err))
-
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Internal server error. Please try again later.",
-		})
-		return
-	}
-	if errors.Is(err, memcached.ErrNotFound) {
-		logger.Error("Client tried to get a cape that does not exist", zap.String("id", id))
-
-		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
-			Message: "This player does not have a cape.",
-		})
-		return
-	}
-
 	ctx.AbortWithStatusJSON(http.StatusOK, response.Cape{
-		Url:  string(item.Value),
-		Type: capeId,
+		Uuid: uid,
+		Type: string(item.Value),
 	})
 	return
 }

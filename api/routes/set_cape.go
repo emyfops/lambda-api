@@ -1,13 +1,32 @@
 package routes
 
 import (
-	"errors"
 	"github.com/Edouard127/lambda-api/api/models/response"
 	"github.com/gin-gonic/gin"
 	"github.com/yeqown/memcached"
 	"go.uber.org/zap"
+	"io"
 	"net/http"
+	"strings"
 )
+
+var capeList = make(map[string]struct{})
+
+func init() {
+	r, err := http.Get("https://cdn.lambda-client.org/capes.txt")
+	if err != nil {
+		return
+	}
+
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+
+	for _, cape := range strings.Fields(string(b)) {
+		capeList[cape] = struct{}{}
+	}
+}
 
 // SetCape godoc
 //
@@ -35,25 +54,15 @@ func SetCape(ctx *gin.Context, cache memcached.Client) {
 	}
 
 	// Check if the cape has an entry
-	_, err := cache.Get(ctx.Request.Context(), cape)
-	if !errors.Is(err, memcached.ErrNotFound) && err != nil {
-		logger.Error("Error getting cape from cache", zap.String("cape", cape), zap.Error(err))
-
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Internal server error. Please try again later.",
-		})
-		return
-	}
-	if errors.Is(err, memcached.ErrNotFound) {
-		logger.Error("Client tried to set a cape that does not exist", zap.String("cape", cape), zap.Any("player", player))
-
+	_, ok := capeList[cape]
+	if !ok {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
 			Message: "This cape does not exist.",
 		})
 		return
 	}
 
-	err = cache.Set(ctx.Request.Context(), player.UUID.String(), []byte(cape), 0, 0)
+	err := cache.Set(ctx.Request.Context(), player.UUID.String(), []byte(cape), 0, 0)
 	if err != nil {
 		logger.Error("Error setting cape", zap.String("id", player.UUID.String()), zap.Error(err))
 

@@ -1,6 +1,8 @@
 package response
 
+import "github.com/google/uuid"
+
 type Cape struct {
-	Url  string `json:"url"`
-	Type string `json:"type"`
+	Uuid uuid.UUID `json:"uuid"`
+	Type string    `json:"type"`
 }
