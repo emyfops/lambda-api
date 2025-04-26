@@ -30,7 +30,7 @@ func LinkDiscord(ctx *gin.Context, cache memcached.Client) {
 
 	var link request.DiscordLink
 
-	err := ctx.Bind(&link)
+	err := ctx.ShouldBindJSON(&link)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",

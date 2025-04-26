@@ -30,7 +30,7 @@ func JoinParty(ctx *gin.Context, cache memcached.Client) {
 
 	var join request.JoinParty
 
-	err := ctx.Bind(&join)
+	err := ctx.ShouldBindJSON(&join)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",

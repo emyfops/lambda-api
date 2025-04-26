@@ -28,7 +28,7 @@ func Login(ctx *gin.Context) {
 
 	var login request.Authentication
 
-	err := ctx.Bind(&login)
+	err := ctx.ShouldBindJSON(&login)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
 			Message: "Required fields are missing or invalid",
