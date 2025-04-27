@@ -2,9 +2,11 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Edouard127/lambda-api/api/models/request"
 	"github.com/Edouard127/lambda-api/api/models/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/yeqown/memcached"
 	"go.uber.org/zap"
 	"net/http"
@@ -35,19 +37,26 @@ func GetCapes(ctx *gin.Context, cache memcached.Client) {
 		return
 	}
 
-	var capes []response.Cape
+	var ids = make([]string, len(lookup.Players))
 	for _, id := range lookup.Players {
-		item, err := cache.Get(ctx.Request.Context(), id.String())
+		ids = append(ids, id.String())
+	}
+
+	var capes []response.Cape
+	items, err := cache.Gets(ctx.Request.Context(), false, ids...)
+	if err != nil && !errors.Is(err, memcached.ErrNotFound) {
+		logger.Error("Error getting player cape from cache", zap.Error(err))
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
+			Message: "Internal server error. Please try again later.",
+		})
+		return
+	}
+
+	for _, item := range items {
+		fmt.Println(item)
+		id, err := uuid.Parse(item.Key)
 		if err != nil {
-			if !errors.Is(err, memcached.ErrNotFound) {
-				logger.Error("Error getting player cape from cache", zap.Error(err))
-
-				ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-					Message: "Internal server error. Please try again later.",
-				})
-				return
-			}
-
 			continue
 		}
 

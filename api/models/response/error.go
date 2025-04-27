@@ -13,5 +13,5 @@ type ValidationError struct {
 
 	// The error details.
 	// example: "errors": "Key: 'Authentication.Token' Error:Field validation for 'Token' failed on the 'required' tag"
-	Errors string `json:"errors"`
+	Errors string `json:"errors,omitempty"`
 }
