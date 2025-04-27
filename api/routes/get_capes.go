@@ -2,7 +2,6 @@ package routes
 
 import (
 	"errors"
-	"fmt"
 	"github.com/Edouard127/lambda-api/api/models/request"
 	"github.com/Edouard127/lambda-api/api/models/response"
 	"github.com/gin-gonic/gin"
@@ -18,9 +17,9 @@ import (
 //	@Tags		Cape
 //	@Accept		json
 //	@Produce	json
+//	@Param		players	body	request.CapeLookup	true	"Required fields are missing or invalid"
 //	@Success	200	{object}	[]response.Cape				"Player capes"
 //	@Failure	400	{object}	response.ValidationError	"Missing or invalid ID in query"
-//	@Failure	404	{object}	response.Error				"No cape found for the provided ID"
 //	@Failure	500	{object}	response.Error				"Internal server error"
 //	@Router		/capes [get]
 //	@Security 	Bearer
@@ -32,7 +31,8 @@ func GetCapes(ctx *gin.Context, cache memcached.Client) {
 	err := ctx.ShouldBindJSON(&lookup)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Missing ID in query",
+			Message: "Required fields are missing or invalid",
+			Errors:  err.Error(),
 		})
 		return
 	}
@@ -54,7 +54,6 @@ func GetCapes(ctx *gin.Context, cache memcached.Client) {
 	}
 
 	for _, item := range items {
-		fmt.Println(item)
 		id, err := uuid.Parse(item.Key)
 		if err != nil {
 			continue
