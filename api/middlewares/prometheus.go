@@ -1,24 +1,20 @@
 package middlewares
 
 import (
-	"github.com/Edouard127/lambda-api/api/metrics"
 	"github.com/gin-gonic/gin"
-	"strconv"
-	"time"
+	"github.com/slok/go-http-metrics/metrics/prometheus"
+	"github.com/slok/go-http-metrics/middleware"
+	ginmiddleware "github.com/slok/go-http-metrics/middleware/gin"
 )
 
-func PrometheusMiddleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		start := time.Now()
+var handler = middleware.New(middleware.Config{
+	Recorder: prometheus.NewRecorder(prometheus.Config{
+		DurationBuckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5},
+	}),
+	GroupedStatus: true,
+	IgnoredPaths:  []string{"/api/health", "/favicon.ico", "/robots.txt"},
+})
 
-		ctx.Next()
-
-		duration := time.Since(start)
-		status := ctx.Writer.Status()
-		path := ctx.Request.URL.Path
-		method := ctx.Request.Method
-
-		metrics.RequestsTotal.WithLabelValues(path, method, strconv.Itoa(status)).Inc()
-		metrics.RequestsDuration.WithLabelValues(path, method, strconv.Itoa(status)).Observe(duration.Seconds())
-	}
+func Metrics() gin.HandlerFunc {
+	return ginmiddleware.Handler("", handler)
 }

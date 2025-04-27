@@ -55,9 +55,9 @@ func main() {
 	if isDebug {
 		router.Use(gin.Logger())
 	}
-	router.Use(middlewares.PrometheusMiddleware())
-	router.Use(gin.Recovery())
+	router.Use(middlewares.Metrics())
 	router.Use(middlewares.Logger(logger))
+	router.Use(gin.Recovery())
 
 	healthcheck.Register(router, dragon)
 	api.Register(router, dragon)
@@ -75,7 +75,6 @@ func startPrometheus(logger *zap.Logger) {
 	http.ListenAndServe(":9100", nil)
 }
 
-// printBuildInfo reading compile information of the binary program with runtime/debug package，and print it to log
 func printBuildInfo(logger *zap.Logger) {
 	binaryInfo, _ := debug.ReadBuildInfo()
 	settings := make(map[string]string)
