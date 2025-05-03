@@ -3,6 +3,7 @@ package routes
 import (
 	"errors"
 	"github.com/Edouard127/lambda-api/api/models"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -12,8 +13,8 @@ import (
 
 // GetCapes returns a list of player
 func GetCapes(ctx *fiber.Ctx) error {
-	logger := ctx.Locals("logger").(*slog.Logger)
-	cache := ctx.Locals("cache").(*redis.Client)
+	logger := internal.MustGetState[*slog.Logger]("logger")
+	cache := internal.MustGetState[*redis.Client]("cache")
 
 	var lookup models.CapeLookup
 

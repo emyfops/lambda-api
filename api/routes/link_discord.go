@@ -17,18 +17,12 @@ func LinkDiscord(ctx *fiber.Ctx) error {
 
 	err := ctx.BodyParser(&link)
 	if err != nil {
-		return ctx.JSON(fiber.Error{
-			Code:    http.StatusUnprocessableEntity,
-			Message: "required fields are missing or invalid",
-		})
+		return fiber.NewError(http.StatusUnprocessableEntity, "required fields are missing or invalid")
 	}
 
 	err = models.GetDiscord(link.Token, &player)
 	if err != nil {
-		return ctx.JSON(fiber.Error{
-			Code:    http.StatusUnauthorized,
-			Message: "invalid Discord token",
-		})
+		return fiber.NewError(http.StatusUnauthorized, "invalid discord token")
 	}
 
 	claims := jwt.MapClaims{

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Edouard127/lambda-api/api"
 	"github.com/Edouard127/lambda-api/api/middlewares"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	fiblog "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
@@ -46,12 +47,14 @@ func main() {
 		ReadTimeout: 5 * time.Second,
 	})
 
+	internal.Set("logger", logger)
+	internal.Set("cache", rdb)
+
 	if *isDebug {
 		router.Use(fiblog.New())
 		router.Use(pprof.New())
 	}
 	router.Use(middlewares.MeasureRequest())
-	router.Use(middlewares.Locals("logger", logger, "cache", rdb))
 	router.Use(recover.New(recover.Config{EnableStackTrace: *isDebug}))
 
 	api.New(router, rdb)

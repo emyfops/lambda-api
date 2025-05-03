@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Edouard127/lambda-api/api/models"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"io"
@@ -42,9 +43,9 @@ func init() {
 //	@Router		/query 	[put]
 //	@Security 	Bearer
 func SetCape(ctx *fiber.Ctx) error {
-	logger := ctx.Locals("logger").(*slog.Logger)
+	logger := internal.MustGetState[*slog.Logger]("logger")
+	cache := internal.MustGetState[*redis.Client]("cache")
 	player := ctx.Locals("player").(models.Player)
-	cache := ctx.Locals("cache").(*redis.Client)
 
 	cape := ctx.Query("id")
 	if cape == "" {
