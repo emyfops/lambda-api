@@ -33,11 +33,10 @@ var (
 
 func Locals(args ...any) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		for i := 0; i <= len(args)/2; i++ {
-			if i+1 == len(args) {
-				break
+		for i := 0; i < len(args); i += 2 {
+			if i+1 < len(args) {
+				ctx.Locals(args[i], args[i+1])
 			}
-			ctx.Locals(args[i], args[i+1])
 		}
 		return ctx.Next()
 	}
