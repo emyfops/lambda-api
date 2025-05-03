@@ -21,7 +21,9 @@ RUN set +x \
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main /app/
 
+WORKDIR /app
+
 EXPOSE 8080
 EXPOSE 9100
 
-CMD ["/app/main"]
+CMD ["main"]
