@@ -4,9 +4,9 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/json"
-	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/go-redis/redismock/v9"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -19,8 +19,6 @@ import (
 )
 
 func TestSetCape(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name        string
 		token       string
@@ -67,7 +65,8 @@ func TestSetCape(t *testing.T) {
 	mock.MatchExpectationsInOrder(true)
 
 	app := fiber.New()
-	app.Use(middlewares.Locals("logger", slog.Default(), "cache", db))
+	internal.Set("logger", slog.Default())
+	internal.Set("cache", db)
 	app.Get("/", jwtware.New(jwtware.Config{
 		SuccessHandler: func(ctx *fiber.Ctx) error {
 			token := ctx.Locals("user").(*jwt.Token)
@@ -81,7 +80,7 @@ func TestSetCape(t *testing.T) {
 			ctx.Locals("player", player)
 			return ctx.Next()
 		},
-		// here we use hs256 because keys are deterministic unlike the rsa rand generator
+		// here we use hs256 because keys are deterministic
 		SigningKey: jwtware.SigningKey{
 			JWTAlg: "HS256",
 			Key:    hmac.New(sha256.New, []byte{}).Sum(nil),
@@ -106,6 +105,9 @@ func TestSetCape(t *testing.T) {
 			} else {
 				assert.Equal(t, http.StatusOK, resp.StatusCode)
 			}
+
+			// All database calls must happen
+			assert.Nil(t, mock.ExpectationsWereMet())
 		})
 	}
 

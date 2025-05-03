@@ -3,9 +3,9 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	flag "github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,6 @@ import (
 )
 
 func TestLogin(t *testing.T) {
-	t.Parallel()
 	flag.Set("online", "false")
 
 	testCases := []struct {
@@ -51,7 +50,7 @@ func TestLogin(t *testing.T) {
 	}
 
 	app := fiber.New()
-	app.Use(middlewares.Locals("logger", slog.Default()))
+	internal.Set("logger", slog.Default())
 	app.Get("/", routes.Login)
 
 	for _, tc := range testCases {

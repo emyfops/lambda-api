@@ -3,8 +3,8 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/routes"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/go-redis/redismock/v9"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
@@ -15,8 +15,6 @@ import (
 )
 
 func TestGetCapes(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name        string
 		body        map[string]interface{}
@@ -66,7 +64,8 @@ func TestGetCapes(t *testing.T) {
 	mock.MatchExpectationsInOrder(true)
 
 	app := fiber.New()
-	app.Use(middlewares.Locals("logger", slog.Default(), "cache", db))
+	internal.Set("logger", slog.Default())
+	internal.Set("cache", db)
 	app.Get("/", routes.GetCapes)
 
 	for _, tc := range testCases {

@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/routes"
+	"github.com/Edouard127/lambda-api/internal"
 	"github.com/go-redis/redismock/v9"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
@@ -13,8 +13,6 @@ import (
 )
 
 func TestGetCape(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name        string
 		query       string
@@ -45,11 +43,11 @@ func TestGetCape(t *testing.T) {
 	}
 
 	db, mock := redismock.NewClientMock()
-
 	mock.MatchExpectationsInOrder(true)
 
 	app := fiber.New()
-	app.Use(middlewares.Locals("logger", slog.Default(), "cache", db))
+	internal.Set("logger", slog.Default())
+	internal.Set("cache", db)
 	app.Get("/", routes.GetCape)
 
 	for _, tc := range testCases {
@@ -69,9 +67,9 @@ func TestGetCape(t *testing.T) {
 			} else {
 				assert.Equal(t, http.StatusOK, resp.StatusCode)
 			}
+
+			// All database calls must happen
+			assert.Nil(t, mock.ExpectationsWereMet())
 		})
 	}
-
-	// All database calls must happen
-	assert.Nil(t, mock.ExpectationsWereMet())
 }
