@@ -41,9 +41,10 @@ func main() {
 		logger.Warn("Warning, running in offline mode allows users to spoof their authentication and usurpate other players")
 	}
 
-	rdb := redis.NewClient(&redis.Options{Addr: *redisEndpoint})
+	rdb := redis.NewClient(&redis.Options{Addr: *redisEndpoint, ReadTimeout: 1 * time.Second})
 
 	router := fiber.New(fiber.Config{
+		Network:     "tcp", // v4 and v6
 		ReadTimeout: 5 * time.Second,
 	})
 
