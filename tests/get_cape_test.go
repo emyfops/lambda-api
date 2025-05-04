@@ -20,7 +20,7 @@ func TestGetCape(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name:  "Locals player id",
+			name:  "Player id",
 			query: "?id=00000000-0000-0000-0000-000000000000",
 			preflight: func(mock redismock.ClientMock) {
 				mock.ExpectGet("00000000-0000-0000-0000-000000000000").SetVal("1")
@@ -28,7 +28,7 @@ func TestGetCape(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:  "Locals additional player ids",
+			name:  "Additional player ids",
 			query: "?id=00000000-0000-0000-0000-000000000000&id=ab24f5d6-dcf1-45e4-897e-b50a7c5e7422",
 			preflight: func(mock redismock.ClientMock) {
 				mock.ExpectGet("00000000-0000-0000-0000-000000000000").SetVal("1")

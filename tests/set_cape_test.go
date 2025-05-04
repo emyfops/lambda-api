@@ -27,7 +27,7 @@ func TestSetCape(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name:  "Locals user 1",
+			name:  "Set user 1 cape",
 			token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWUiOiJ0ZXN0X3VzZXIxIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJkaXNjb3JkX2lkIjoiMDAwMDAwMDAwMDAwMDAwMDAxIiwidW5zYWZlIjpmYWxzZX0sImV4cCI6MjE0MTM4MDcwNCwiaWF0IjoxNzQxMjk0MzA0LCJuYmYiOjE3NDEyOTQzMDR9.VwctPUX2DzgsBnVxmlrtwexlPj3OQP4d0suGXttB6Mw",
 			query: "?id=galaxy",
 			preflight: func(mock redismock.ClientMock) {
@@ -36,7 +36,7 @@ func TestSetCape(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:  "Locals user 2",
+			name:  "Set user 2 cape",
 			token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWUiOiJ0ZXN0X3VzZXIyIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJkaXNjb3JkX2lkIjoiMDAwMDAwMDAwMDAwMDAwMDAyIiwidW5zYWZlIjpmYWxzZX0sImV4cCI6MjE0MTM4MDcwNCwiaWF0IjoxNzQxMjk0MzA0LCJuYmYiOjE3NDEyOTQzMDR9.dyzi3eHRC2xB3nNmZKIuBjDvwBh4ADFP3F89Zvv2wFk",
 			query: "?id=galaxy",
 			preflight: func(mock redismock.ClientMock) {
@@ -45,18 +45,18 @@ func TestSetCape(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:        "Locals no algorithm",
+			name:        "No algorithm",
 			token:       "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJkYXRhIjp7Im5hbWUiOiJtYWxpY2lvdXNfdXNlciIsImlkIjoiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwiZGlzY29yZF9pZCI6IjAwMDAwMDAwMDAwMDAwMDAwMCIsInVuc2FmZSI6ZmFsc2V9LCJleHAiOjIxNDEzODA3MDQsImlhdCI6MTc0MTI5NDMwNCwibmJmIjoxNzQxMjk0MzA0fQ.",
 			expectError: true,
 		},
 		{
-			name:        "Locals invalid query",
+			name:        "Invalid query",
 			token:       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im5hbWUiOiJ0ZXN0X3VzZXIxIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJkaXNjb3JkX2lkIjoiMDAwMDAwMDAwMDAwMDAwMDAxIiwidW5zYWZlIjpmYWxzZX0sImV4cCI6MjE0MTM4MDcwNCwiaWF0IjoxNzQxMjk0MzA0LCJuYmYiOjE3NDEyOTQzMDR9.VwctPUX2DzgsBnVxmlrtwexlPj3OQP4d0suGXttB6Mw",
 			query:       "?id=x",
 			expectError: true,
 		},
 		{
-			name:        "Locals no login",
+			name:        "No login",
 			expectError: true,
 		},
 	}

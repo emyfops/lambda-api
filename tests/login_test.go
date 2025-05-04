@@ -24,7 +24,7 @@ func TestLogin(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name: "Locals invalid name",
+			name: "Invalid name",
 			body: models.Authentication{
 				Username: "-",
 				Hash:     "",
@@ -32,7 +32,7 @@ func TestLogin(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name: "Locals invalid name",
+			name: "Invalid name",
 			body: models.Authentication{
 				Username: "ｕｓｅｒｎａｍｅ２",
 				Hash:     "",
@@ -40,7 +40,7 @@ func TestLogin(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name: "Locals invalid name",
+			name: "Invalid name",
 			body: models.Authentication{
 				Username: "u̸̥͍͂̐͐ͅs̸̨̝̈ȅ̶̫̚r̷̠̆̽͘͝n̶͚̓̓̈́͝a̸͍̱͇̒͂m̵̞̦̰̽̇̔͝e̷̓͜3̵̛͖̱̗̗̌",
 				Hash:     "",

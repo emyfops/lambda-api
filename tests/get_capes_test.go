@@ -22,7 +22,7 @@ func TestGetCapes(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name: "Locals player ids",
+			name: "Get player ids",
 			body: map[string]interface{}{
 				"players": []string{
 					"00000000-0000-0000-0000-000000000000",
@@ -44,7 +44,31 @@ func TestGetCapes(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Locals wrong player ids",
+			name: "Get player ids with non present ids",
+			body: map[string]interface{}{
+				"players": []string{
+					"00000000-0000-0000-0000-000000000000",
+					"00000000-0000-0000-0000-000000000001",
+					"00000000-0000-0000-0000-000000000002",
+					"00000000-0000-0000-0000-000000000003",
+					"00000000-0000-0000-0000-000000000004",
+					"00000001-0000-0000-0000-000000000000",
+				},
+			},
+			preflight: func(mock redismock.ClientMock) {
+				mock.ExpectMGet(
+					"00000000-0000-0000-0000-000000000000",
+					"00000000-0000-0000-0000-000000000001",
+					"00000000-0000-0000-0000-000000000002",
+					"00000000-0000-0000-0000-000000000003",
+					"00000000-0000-0000-0000-000000000004",
+					"00000001-0000-0000-0000-000000000000",
+				).SetVal([]any{"0", "1", "2", "3", "4", nil})
+			},
+			expectError: false,
+		},
+		{
+			name: "Wrong player ids",
 			body: map[string]interface{}{
 				"players": []string{
 					"00000000-0000-0000-0000-000000000000",
@@ -54,7 +78,7 @@ func TestGetCapes(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name:        "Locals no player ids",
+			name:        "No player ids",
 			body:        make(map[string]interface{}),
 			expectError: false,
 		},
