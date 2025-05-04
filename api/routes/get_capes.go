@@ -45,7 +45,12 @@ func GetCapes(ctx *fiber.Ctx) error {
 	}
 
 	for _, item := range keys {
-		id, err := uuid.Parse(item.(string))
+		sid, ok := item.(string)
+		if !ok {
+			continue
+		}
+
+		id, err := uuid.Parse(sid)
 		if err != nil {
 			continue
 		}
