@@ -2,11 +2,13 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	metrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
+	"net/http"
 	"strconv"
 )
 
@@ -30,6 +32,20 @@ var (
 		Help:      "The number of requests on a given router.",
 	}, []string{cfg.MethodLabel, cfg.StatusCodeLabel})
 )
+
+func ErrorHandler(ctx *fiber.Ctx, err error) error {
+	code := http.StatusInternalServerError
+	var e *fiber.Error
+	if errors.As(err, &e) {
+		code = e.Code
+	} else {
+		e = &fiber.Error{
+			Code:    code,
+			Message: err.Error(),
+		}
+	}
+	return ctx.Status(code).JSON(e)
+}
 
 func Locals(args ...any) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {

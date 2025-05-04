@@ -11,6 +11,7 @@ import (
 )
 
 var MinecraftCheck = jwtware.New(jwtware.Config{
+	ErrorHandler: ErrorHandler,
 	SuccessHandler: func(ctx *fiber.Ctx) error {
 		token := ctx.Locals("user").(*jwt.Token)
 

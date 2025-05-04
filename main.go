@@ -44,8 +44,9 @@ func main() {
 	rdb := redis.NewClient(&redis.Options{Addr: *redisEndpoint, ReadTimeout: 1 * time.Second})
 
 	router := fiber.New(fiber.Config{
-		Network:     "tcp", // v4 and v6
-		ReadTimeout: 5 * time.Second,
+		Network:      "tcp", // v4 and v6
+		ReadTimeout:  5 * time.Second,
+		ErrorHandler: middlewares.ErrorHandler,
 	})
 
 	internal.Set("logger", logger)
