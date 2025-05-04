@@ -52,7 +52,9 @@ func main() {
 	internal.Set("cache", rdb)
 
 	if *isDebug {
-		router.Use(fiblog.New())
+		router.Use(fiblog.New(fiblog.Config{
+			Format: "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error} | ${body}\n",
+		}))
 		router.Use(pprof.New())
 	}
 	router.Use(middlewares.MeasureRequest())
