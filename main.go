@@ -54,11 +54,11 @@ func main() {
 
 	if *isDebug {
 		router.Use(fiblog.New(fiblog.Config{
-			Format: "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error} | ${body}\n",
+			Format: "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
 		}))
 		router.Use(pprof.New())
 	}
-	router.Use(middlewares.MeasureRequest())
+	router.Use(middlewares.RequestDuration())
 	router.Use(recover.New(recover.Config{EnableStackTrace: *isDebug}))
 
 	api.New(router, rdb)
