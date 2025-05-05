@@ -1,16 +1,46 @@
 package tests
 
 import (
+	"bytes"
+	"encoding/json"
+	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/go-redis/redismock/v9"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 )
+
+func Test(t *testing.T) {
+	request := models.CapeLookup{Players: make([]uuid.UUID, 0)}
+
+	for i := 0; i < 1; i++ {
+		id, _ := uuid.NewRandom()
+		request.Players = append(request.Players, id)
+	}
+
+	b, _ := json.Marshal(request)
+
+	var wg sync.WaitGroup
+	wg.Add(1000)
+
+	for i := 0; i < 1000; i++ {
+		go func() {
+			defer wg.Done()
+			req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/capes", bytes.NewReader(b))
+			req.Header.Set("Content-Type", "application/json")
+			http.DefaultClient.Do(req)
+		}()
+	}
+
+	wg.Wait()
+}
 
 func TestGetCape(t *testing.T) {
 	testCases := []struct {

@@ -60,9 +60,10 @@ func Locals(args ...any) fiber.Handler {
 
 func MeasureRequest() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		handler.Measure("", reporter{ctx}, func() {})
-
-		err := ctx.Next()
+		var err error
+		handler.Measure("", reporter{ctx}, func() {
+			err = ctx.Next()
+		})
 
 		httpRequestsTotal.WithLabelValues(string(ctx.Request().Header.Method()), strconv.Itoa(ctx.Response().StatusCode()))
 
