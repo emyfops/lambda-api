@@ -1,49 +1,60 @@
 package api
 
 import (
+	"context"
 	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
-	"github.com/gin-gonic/gin"
-	"github.com/yeqown/memcached"
+	"github.com/alexliesenfeld/health"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/redis/go-redis/v9"
+	"time"
 )
 
-// Register godoc
-//
-//	@Title						Lambda API
-//	@Version					v1
-//	@Description				This is the official API for Lambda Client
-//
-//	@BasePath					/api/v1
-//	@Schemes					http https
-//
-//	@Contact.name				Lambda Discord
-//	@Contact.url				https://discord.gg/QjfBxJzE5x
-//
-//	@License.name				GNU General Public License v3.0
-//	@License.url				https://www.gnu.org/licenses/gpl-3.0.html
-//
-//	@SecurityDefinitions.ApiKey	Bearer
-//	@In							header
-//	@Name						Authorization
-//	@Description				Type "Bearer" followed by a space and JWT token.
-func Register(router *gin.Engine, cache memcached.Client) {
+func New(router fiber.Router, cache *redis.Client) {
+	api := router.Group("/api")
+
+	checker := health.NewChecker(
+		health.WithCacheDuration(2*time.Second),
+		health.WithTimeout(5*time.Second),
+		health.WithPeriodicCheck(
+			2*time.Second,
+			time.Second,
+			health.Check{
+				Name:  "http-connection-mojang-session",
+				Check: internal.HTTPGetCheck("https://sessionserver.mojang.com/session/minecraft/hasJoined"),
+			},
+		),
+		health.WithPeriodicCheck(
+			60*time.Second,
+			time.Second,
+			health.Check{
+				Name:  "redis-connection",
+				Check: func(ctx context.Context) error { return cache.Ping(ctx).Err() },
+			},
+		),
+	)
+	api.Get("/health", adaptor.HTTPHandler(health.NewHandler(checker)))
+
 	v1 := router.Group("/api/v1")
 
-	// Login endpoints
-	v1.POST("/login", routes.Login)
-	v1.POST("/link/discord", middlewares.CheckAuth, internal.With(cache, routes.LinkDiscord))
+	// Login
+	v1.Post("/login", routes.Login)
+	v1.Post("/link/discord", middlewares.MinecraftCheck, routes.LinkDiscord)
+
+	// Capes
+	v1.Get("/cape", routes.GetCape)
+	v1.Get("/capes", routes.GetCapes)
+	v1.Put("/cape", middlewares.MinecraftCheck, routes.SetCape)
 
 	// Party endpoints
-	v1.POST("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.CreateParty))
-	v1.PUT("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.JoinParty))
-	v1.PUT("/party/leave", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.LeaveParty))
-	v1.DELETE("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.DeleteParty))
-	v1.GET("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.GetParty))
-	v1.GET("/party/listen", middlewares.CheckAuth, middlewares.DiscordCheck, internal.With(cache, routes.PartyListen))
-
-	// Cape endpoints
-	v1.GET("/cape", internal.With(cache, routes.GetCape))
-	v1.GET("/capes", internal.With(cache, routes.GetCapes))
-	v1.PUT("/cape", middlewares.CheckAuth, internal.With(cache, routes.SetCape))
+	/*
+		v1.Post("/party/create", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.CreateParty))
+		v1.Put("/party/join", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.JoinParty))
+		v1.Put("/party/leave", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.LeaveParty))
+		v1.Delete("/party/delete", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.DeleteParty))
+		v1.Get("/party", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.GetParty))
+		v1.Get("/party/listen", middlewares.CheckAuth, middlewares.DiscordCheck, internal.Locals(cache, routes.PartyListen))
+	*/
 }

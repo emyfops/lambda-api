@@ -1,11 +1,12 @@
 package routes
 
 import (
-	"github.com/Edouard127/lambda-api/api/models/response"
-	"github.com/gin-gonic/gin"
-	"github.com/yeqown/memcached"
-	"go.uber.org/zap"
+	"github.com/Edouard127/lambda-api/api/models"
+	"github.com/Edouard127/lambda-api/internal"
+	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -30,48 +31,39 @@ func init() {
 
 // SetCape godoc
 //
-//	@Summary	Set a player's cape
+//	@Summary	Set a player's query
 //	@Tags		Cape
 //	@Accept		json
 //	@Produce	json
-//	@Param		id		query	string	true	"Name of the cape to be set"
+//	@Param		id		query	string	true	"Name of the query to be set"
 //	@Success	200		"Success"
-//	@Failure	400		{object}	response.ValidationError	"Missing or invalid cape in query"
+//	@Failure	400		{object}	response.ValidationError	"Missing or invalid query in query"
 //	@Failure	404		{object}	response.Error				"Cape does not exist"
 //	@Failure	500		{object}	response.Error				"Internal server error"
-//	@Router		/cape 	[put]
+//	@Router		/query 	[put]
 //	@Security 	Bearer
-func SetCape(ctx *gin.Context, cache memcached.Client) {
-	logger := ctx.MustGet("logger").(*zap.Logger)
-	player := ctx.MustGet("player").(response.Player)
+func SetCape(ctx *fiber.Ctx) error {
+	logger := internal.MustGetState[*slog.Logger]("logger")
+	cache := internal.MustGetState[*redis.Client]("cache")
+	player := ctx.Locals("player").(models.Player)
 
 	cape := ctx.Query("id")
 	if cape == "" {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Missing cape in query",
-		})
-		return
+		return fiber.NewError(http.StatusBadRequest, "missing query in query")
 	}
 
-	// Check if the cape has an entry
+	// Check if the query has an entry
 	_, ok := capeList[cape]
 	if !ok {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, response.Error{
-			Message: "This cape does not exist.",
-		})
-		return
+		return fiber.NewError(http.StatusNotFound, "this query does not exist")
 	}
 
-	err := cache.Set(ctx.Request.Context(), player.UUID.String(), []byte(cape), 0, 0)
+	_, err := cache.Set(ctx.UserContext(), player.UUID.String(), cape, 0).Result()
 	if err != nil {
-		logger.Error("Error setting cape", zap.String("id", player.UUID.String()), zap.Error(err))
+		logger.Error("Error setting query", slog.Any("player", player), slog.Any("error", err))
 
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Internal server error. Please try again later.",
-		})
-		return
+		return fiber.NewError(http.StatusInternalServerError, "internal server error")
 	}
 
-	ctx.AbortWithStatus(http.StatusOK)
-	return
+	return ctx.SendStatus(http.StatusOK)
 }

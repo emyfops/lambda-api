@@ -1,67 +1,53 @@
 package routes
 
 import (
-	"github.com/Edouard127/lambda-api/api/metrics"
-	"github.com/Edouard127/lambda-api/api/models/request"
-	"github.com/Edouard127/lambda-api/api/models/response"
+	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/internal"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
+	"regexp"
 	"time"
 )
 
-// Login allows a player to log in to the server using a Minecraft username and Mojang session hash.
+// Login allows a player to log in to the server using a Minecraft username and Mojang session hash
 //
-//	@Summary	Login to the server
-//	@Tags		Authentication
-//	@Accept		json
-//	@Produce	json
-//	@Param		login	body	request.Authentication	true	"Authentication credentials (Minecraft username and Mojang session hash)"
-//	@Success	200	{object}	response.Authentication		"Successfully logged in and retrieved authentication token"
-//	@Failure	400	{object}	response.ValidationError	"Invalid or missing authentication fields"
-//	@Failure	401	{object}	response.Error				"Invalid credentials"
-//	@Failure	500	{object}	response.Error				"Internal server error"
-//	@Router		/login [post]
-func Login(ctx *gin.Context) {
-	logger := ctx.MustGet("logger").(*zap.Logger)
+// Refer to the project README for more information on that process
+func Login(ctx *fiber.Ctx) error {
+	var login models.Authentication
 
-	var login request.Authentication
-
-	err := ctx.ShouldBindJSON(&login)
+	err := ctx.BodyParser(&login)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Required fields are missing or invalid",
-			Errors:  err.Error(),
-		})
-		return
+		return fiber.NewError(http.StatusUnprocessableEntity, "required fields are missing or invalid")
 	}
 
-	player, err := response.GetPlayer(login.Username, login.Hash)
-	if err != nil {
-		metrics.FailedLogins.Inc()
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.Error{
-			Message: "Invalid credentials",
-		})
-		return
+	ok, err := regexp.MatchString("^[a-zA-Z0-9_]{2,16}$", login.Username)
+	if !ok || err != nil {
+		return fiber.NewError(http.StatusUnprocessableEntity, "required fields are missing or invalid")
 	}
 
-	signed, err := internal.NewJwt(player)
+	player, err := models.GetPlayer(login.Username, login.Hash)
 	if err != nil {
-		logger.Error("Error signing token", zap.Error(err))
-		metrics.FailedLogins.Inc()
-
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Failed to create token",
-		})
-		return
+		return fiber.NewError(http.StatusUnauthorized, "invalid credentials")
 	}
 
-	metrics.SuccessfulLogins.Inc()
+	claims := jwt.MapClaims{
+		"nbf":  time.Now().Unix(),
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
+		"data": player,
+	}
 
-	ctx.AbortWithStatusJSON(http.StatusOK, response.Authentication{
-		AccessToken: signed,
-		ExpiresIn:   int64(time.Hour * 24),
-		TokenType:   "Bearer",
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	signed, err := token.SignedString(internal.PrivateKey)
+	if err != nil {
+		return fiber.NewError(http.StatusInternalServerError, "failed to create token")
+	}
+
+	return ctx.JSON(fiber.Map{
+		"access_token": signed,
+		"expires_in":   int64(time.Hour * 24),
+		"token_type":   "Bearer",
 	})
 }

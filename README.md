@@ -15,12 +15,12 @@ Statuses:
 | /login        |  POST  | ✅      |                                           Allows a player to authenticate using a Minecraft username and Mojang session hash. |
 | /link/discord |  POST  | ✅      |                                      Links a Discord account to an existing authentication token using a Discord OAuth token. |
 |               |        |        |                                                                                                                               |
-| /party/create |  POST  | ⏳      | Creates a new party and associates it with the player. <br/> Automatically deletes or leaves existing parties for the player. |
-| /party/join   |  PUT   | ⏳      |                                                               Allows a player to join an existing party using a party secret. |~~
-| /party/leave  |  PUT   | ⏳      |                                 Removes a player from their current party.<br/>Deletes the party if the player is the leader. |
-| /party/delete | DELETE | ⏳      |                                                                        Deletes an existing party if the player is the leader. |
-| /party        |  GET   | ⏳      |                                                                           Retrieves details about the player's current party. |
-| /party/listen |  GET   | 🟡     |                                                             Streams party updates to the player via Server-Sent Events (SSE). |
+| /party/create |  POST  | ❌      | Creates a new party and associates it with the player. <br/> Automatically deletes or leaves existing parties for the player. |
+| /party/join   |  PUT   | ❌      |                                                               Allows a player to join an existing party using a party secret. |~~
+| /party/leave  |  PUT   | ❌      |                                 Removes a player from their current party.<br/>Deletes the party if the player is the leader. |
+| /party/delete | DELETE | ❌      |                                                                        Deletes an existing party if the player is the leader. |
+| /party        |  GET   | ❌      |                                                                           Retrieves details about the player's current party. |
+| /party/listen |  GET   | ❌     |                                                             Streams party updates to the player via Server-Sent Events (SSE). |
 |               |        |        |                                                                                                                               |
 | /cape         |  GET   | ✅      |                                                                                             Fetches the ID of a player's cape |
 | /cape         |  PUT   | ✅      |                                                                                      Updates the player's cape with a new ID. |

@@ -1,8 +1,6 @@
 name: Docker CI
 
 on:
-  schedule:
-    - cron: "0 10 * * *"
   push:
     branches:
       - "**"
@@ -15,8 +13,27 @@ env:
   DOCKER_IMAGE: lambda-api
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.23.x
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
   docker:
     runs-on: ubuntu-latest
+    needs: tests
     steps:
       - name: Docker meta
         id: meta

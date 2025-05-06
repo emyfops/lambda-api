@@ -2,69 +2,67 @@ package routes
 
 import (
 	"errors"
-	"github.com/Edouard127/lambda-api/api/models/request"
-	"github.com/Edouard127/lambda-api/api/models/response"
-	"github.com/gin-gonic/gin"
+	"github.com/Edouard127/lambda-api/api/models"
+	"github.com/Edouard127/lambda-api/internal"
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/yeqown/memcached"
-	"go.uber.org/zap"
+	"github.com/redis/go-redis/v9"
+	"log/slog"
 	"net/http"
 )
 
-// GetCapes godoc
-//
-//	@Summary	Get a player's cape
-//	@Tags		Cape
-//	@Accept		json
-//	@Produce	json
-//	@Param		players	body	request.CapeLookup	true	"Required fields are missing or invalid"
-//	@Success	200	{object}	[]response.Cape				"Player capes"
-//	@Failure	400	{object}	response.ValidationError	"Missing or invalid ID in query"
-//	@Failure	500	{object}	response.Error				"Internal server error"
-//	@Router		/capes [get]
-//	@Security 	Bearer
-func GetCapes(ctx *gin.Context, cache memcached.Client) {
-	logger := ctx.MustGet("logger").(*zap.Logger)
+// GetCapes returns a list of player
+func GetCapes(ctx *fiber.Ctx) error {
+	logger := internal.MustGetState[*slog.Logger]("logger")
+	cache := internal.MustGetState[*redis.Client]("cache")
 
-	var lookup request.CapeLookup
+	var lookup models.CapeLookup
 
-	err := ctx.ShouldBindJSON(&lookup)
+	err := ctx.BodyParser(&lookup)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.ValidationError{
-			Message: "Required fields are missing or invalid",
-			Errors:  err.Error(),
-		})
-		return
+		return fiber.NewError(http.StatusUnprocessableEntity, "required fields are missing or invalid")
 	}
 
-	var ids = make([]string, len(lookup.Players))
+	if len(lookup.Players) == 0 {
+		return ctx.SendString("[]")
+	}
+
+	var ids = make([]string, 0)
 	for _, id := range lookup.Players {
 		ids = append(ids, id.String())
 	}
 
-	var capes []response.Cape
-	items, err := cache.Gets(ctx.Request.Context(), false, ids...)
-	if err != nil && !errors.Is(err, memcached.ErrNotFound) {
-		logger.Error("Error getting player cape from cache", zap.Error(err))
-
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Error{
-			Message: "Internal server error. Please try again later.",
-		})
-		return
+	var capes []struct {
+		Uuid uuid.UUID
+		Type string
 	}
 
-	for _, item := range items {
-		id, err := uuid.Parse(item.Key)
+	keys, err := cache.MGet(ctx.UserContext(), ids...).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		logger.Error("Error getting player query from cache", slog.Any("error", err))
+
+		return fiber.NewError(http.StatusInternalServerError, "internal server error")
+	}
+
+	for _, item := range keys {
+		sid, ok := item.(string)
+		if !ok {
+			continue
+		}
+
+		id, err := uuid.Parse(sid)
 		if err != nil {
 			continue
 		}
 
-		capes = append(capes, response.Cape{
+		capes = append(capes, struct {
+			Uuid uuid.UUID
+			Type string
+		}{
 			Uuid: id,
-			Type: string(item.Value),
+			Type: item.(string),
 		})
 	}
 
-	ctx.AbortWithStatusJSON(http.StatusOK, capes)
-	return
+	return ctx.JSON(capes)
 }
