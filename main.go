@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 	"log/slog"
 	"os"
 	"runtime/debug"
@@ -23,6 +24,7 @@ import (
 var (
 	isOnline      = flag.Bool("online", true, "Online-mode authentication")
 	isDebug       = flag.Bool("debug", true, "Enable debug log output")
+	port          = flag.Int("port", 8091, "Server port")
 	redisEndpoint = flag.String("redis", "", "Endpoint of the standalone redis instance")
 	keyPath       = flag.String("key", "", "Path to the private key")
 )
@@ -81,7 +83,7 @@ func main() {
 
 	api.New(router, rdb)
 
-	panic(router.Listen(":8080"))
+	panic(router.Listen(fmt.Sprintf(":%d", *port)))
 }
 
 func printBuildInfo(logger *slog.Logger) {
