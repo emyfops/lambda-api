@@ -34,17 +34,23 @@ keygen_cmd="openssl genpkey -algorithm RSA -out ${lambdad_key} -aes-256-cbc -pke
 
 lambdad_precmd()
 {
-  /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_logdir}
-  /usr/bin/install -d -m 700 -o "${lambdad_user}" -g "${lambdad_group}" /var/run/lambdad
-  if [ -e ${lambdad_logfile} ]; then
-    /bin/chmod 644 ${lambdad_logfile}
-    /usr/sbin/chown "${lambdad_user}:${lambdad_group}" ${lambdad_logfile}
-  else
-    /usr/bin/install -m 644 -o "${lambdad_user}" -g "${lambdad_group}" /dev/null ${lambdad_logfile}
-  fi
-    /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_directory}
-    /usr/bin/install -d -m 600 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_key}
+    /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_logdir}
+    /usr/bin/install -d -m 700 -o "${lambdad_user}" -g "${lambdad_group}" /var/run/lambdad
+    if [ -e ${lambdad_logfile} ]; then
+        /bin/chmod 644 ${lambdad_logfile}
+        /usr/sbin/chown "${lambdad_user}:${lambdad_group}" ${lambdad_logfile}
+    else
+        /usr/bin/install -m 644 -o "${lambdad_user}" -g "${lambdad_group}" /dev/null ${lambdad_logfile}
+    fi
 
+    /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_directory}
+
+    if [ -e ${lambdad_key} ]; then
+        /bin/chmod 600 ${lambdad_key}
+        /usr/sbin/chown "${lambdad_user}:${lambdad_group}" ${lambdad_key}
+    else
+        /usr/bin/install -m 600 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_key}
+    fi
 }
 
 lambdad_start() {
