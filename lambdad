@@ -54,7 +54,7 @@ lambdad_precmd()
 }
 
 lambdad_start() {
-  /usr/bin/su -m "${lambdad_user}" -c "${lambdad_command} ${lambdad_flags} &"
+  /usr/bin/su -m "${lambdad_user}" -c "${lambdad_command} ${lambdad_flags} >> ${lambdad_logfile} 2>&1 &"
   sleep 1
   pid=$(pgrep -f "${lambdad_command}")
   if [ -n "$pid" ]; then
