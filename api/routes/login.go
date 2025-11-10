@@ -1,19 +1,23 @@
 package routes
 
 import (
+	"crypto/rsa"
+	"net/http"
+	"regexp"
+	"time"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
-	"regexp"
-	"time"
 )
 
 // Login allows a player to log in to the server using a Minecraft username and Mojang session hash
 //
 // Refer to the project README for more information on that process
 func Login(ctx *fiber.Ctx) error {
+	key := internal.MustGetState[*rsa.PrivateKey]("key")
+
 	var login models.Authentication
 
 	err := ctx.BodyParser(&login)
@@ -40,7 +44,7 @@ func Login(ctx *fiber.Ctx) error {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	signed, err := token.SignedString(internal.PrivateKey)
+	signed, err := token.SignedString(key)
 	if err != nil {
 		return fiber.NewError(http.StatusInternalServerError, "failed to create token")
 	}

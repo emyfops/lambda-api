@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"time"
+
 	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
@@ -9,7 +11,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 func New(router fiber.Router, cache *redis.Client) {
@@ -41,12 +42,12 @@ func New(router fiber.Router, cache *redis.Client) {
 
 	// Login
 	v1.Post("/login", routes.Login)
-	v1.Post("/link/discord", middlewares.MinecraftCheck, routes.LinkDiscord)
+	v1.Post("/link/discord", middlewares.MinecraftCheck(), routes.LinkDiscord)
 
 	// Capes
 	v1.Get("/cape", routes.GetCape)
 	v1.Get("/capes", routes.GetCapes)
-	v1.Put("/cape", middlewares.MinecraftCheck, routes.SetCape)
+	v1.Put("/cape", middlewares.MinecraftCheck(), routes.SetCape)
 
 	// Party endpoints
 	/*

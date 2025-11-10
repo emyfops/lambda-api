@@ -2,17 +2,19 @@ package tests
 
 import (
 	"bytes"
+	"crypto/rsa"
 	"encoding/json"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	flag "github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestLogin(t *testing.T) {
@@ -51,6 +53,7 @@ func TestLogin(t *testing.T) {
 
 	app := fiber.New()
 	internal.Set("logger", slog.Default())
+	internal.Set("key", &rsa.PrivateKey{})
 	app.Get("/", routes.Login)
 
 	for _, tc := range testCases {

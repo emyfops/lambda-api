@@ -2,20 +2,10 @@ package middlewares
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"net/http"
-	"strconv"
-	"time"
-)
 
-var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-	Subsystem: "http",
-	Name:      "request_duration_seconds",
-	Help:      "Duration of HTTP requests in seconds",
-	Buckets:   prometheus.DefBuckets,
-}, []string{"path", "method", "status"})
+	"github.com/gofiber/fiber/v2"
+)
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	code := http.StatusInternalServerError
@@ -39,18 +29,5 @@ func Locals(args ...any) fiber.Handler {
 			}
 		}
 		return ctx.Next()
-	}
-}
-
-func RequestDuration() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		s := time.Now()
-
-		err := ctx.Next()
-
-		duration := time.Since(s).Seconds()
-		httpDuration.WithLabelValues(ctx.Path(), ctx.Method(), strconv.Itoa(ctx.Response().StatusCode())).Observe(duration)
-
-		return err
 	}
 }

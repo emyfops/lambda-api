@@ -2,13 +2,14 @@ package routes
 
 import (
 	"errors"
+	"log/slog"
+	"net/http"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"log/slog"
-	"net/http"
 )
 
 // GetCapes returns a list of player

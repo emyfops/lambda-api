@@ -1,20 +1,21 @@
 package routes
 
 import (
-	"github.com/Edouard127/lambda-api/api/models"
-	"github.com/Edouard127/lambda-api/internal"
-	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 	"io"
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/Edouard127/lambda-api/api/models"
+	"github.com/Edouard127/lambda-api/internal"
+	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 )
 
 var capeList = make(map[string]struct{})
 
 func init() {
-	r, err := http.Get("https://cdn.lambda-client.org/capes.txt")
+	r, err := http.Get("https://raw.githubusercontent.com/emyfops/lambda-assets/refs/heads/master/capes.txt")
 	if err != nil {
 		return
 	}
@@ -29,19 +30,6 @@ func init() {
 	}
 }
 
-// SetCape godoc
-//
-//	@Summary	Set a player's query
-//	@Tags		Cape
-//	@Accept		json
-//	@Produce	json
-//	@Param		id		query	string	true	"Name of the query to be set"
-//	@Success	200		"Success"
-//	@Failure	400		{object}	response.ValidationError	"Missing or invalid query in query"
-//	@Failure	404		{object}	response.Error				"Cape does not exist"
-//	@Failure	500		{object}	response.Error				"Internal server error"
-//	@Router		/query 	[put]
-//	@Security 	Bearer
 func SetCape(ctx *fiber.Ctx) error {
 	logger := internal.MustGetState[*slog.Logger]("logger")
 	cache := internal.MustGetState[*redis.Client]("cache")

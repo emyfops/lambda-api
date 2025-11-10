@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	flag "github.com/spf13/pflag"
 	"io"
 	"net/http"
+
+	"github.com/google/uuid"
+	flag "github.com/spf13/pflag"
 )
 
 var ErrCouldNotVerifyMinecraft = errors.New("could not verify minecraft account")

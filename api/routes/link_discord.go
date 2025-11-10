@@ -1,16 +1,20 @@
 package routes
 
 import (
+	"crypto/rsa"
+	"net/http"
+	"time"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
-	"time"
 )
 
 // LinkDiscord links a discord account to an existing bearer token
 func LinkDiscord(ctx *fiber.Ctx) error {
+	key := internal.MustGetState[*rsa.PrivateKey]("key")
+
 	player := ctx.Locals("player").(models.Player)
 
 	var link models.DiscordLink
@@ -34,7 +38,7 @@ func LinkDiscord(ctx *fiber.Ctx) error {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	signed, err := token.SignedString(internal.PrivateKey)
+	signed, err := token.SignedString(key)
 	if err != nil {
 		return fiber.NewError(http.StatusInternalServerError, "failed to create token")
 	}

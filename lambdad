@@ -1,0 +1,79 @@
+# #!/bin/sh
+#
+# PROVIDE: lambdad
+# REQUIRE: NETWORKING
+# BEFORE:  LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name=lambdad
+rcvar=lambdad_enable
+desc="Official API for the Lambda utility mod."
+
+load_rc_config $name
+
+: ${lambdad_enable:=NO}
+: ${lambdad_command="/usr/local/bin/${name}"}
+: ${lambdad_directory="/usr/local/etc/lambdad"}
+: ${lambdad_key="${lambdad_directory}/key.pem"}
+: ${lambdad_flags="--online=true --debug=true --redis=localhost:999 --key=${lambdad_key}"}
+: ${lambdad_logdir="/var/log/${name}"}
+: ${lambdad_logfile="${lambdad_logdir}/${name}.log"}
+: ${lambdad_user:="root"}
+: ${lambdad_group:="wheel"}
+
+command="${lambdad_command}"
+pidfile="/var/run/${name}/${name}.pid"
+
+start_precmd="lambdad_precmd"
+start_cmd="lambdad_start"
+
+extra_commands="keygen"
+keygen_cmd="openssl genpkey -algorithm RSA -out ${lambdad_key} -aes-256-cbc -pkeyopt rsa_keygen_bits:2048"
+
+lambdad_precmd()
+{
+  /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_logdir}
+  /usr/bin/install -d -m 700 -o "${lambdad_user}" -g "${lambdad_group}" /var/run/lambdad
+  if [ -e ${lambdad_logfile} ]; then
+    /bin/chmod 644 ${lambdad_logfile}
+    /usr/sbin/chown "${lambdad_user}:${lambdad_group}" ${lambdad_logfile}
+  else
+    /usr/bin/install -m 644 -o "${lambdad_user}" -g "${lambdad_group}" /dev/null ${lambdad_logfile}
+  fi
+    /usr/bin/install -d -m 755 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_directory}
+    /usr/bin/install -d -m 600 -o "${lambdad_user}" -g "${lambdad_group}" ${lambdad_key}
+
+}
+
+lambdad_start() {
+  /usr/bin/su -m "${lambdad_user}" -c "${lambdad_command} ${lambdad_flags} &"
+  sleep 1
+  pid=$(pgrep -f "${lambdad_command}")
+  if [ -n "$pid" ]; then
+    echo $pid > ${pidfile}
+    echo "pid: $pid"
+    echo "Log: ${lambdad_logfile}"
+  else
+    echo "Error: lambdad failed to start"
+    echo "Check the log: ${lambdad_logfile}"
+    return 1
+  fi
+}
+
+lambdad_stop() {
+  if [ -f ${pidfile} ]; then
+    pid=$(cat ${pidfile})
+    if kill -TERM $pid; then
+      echo "lambdad stopped successfully"
+      rm -f ${pidfile}
+    else
+      echo "unable to stop lambdad"
+    fi
+  else
+    echo "pid file not found, is lambdad running?"
+  fi
+}
+
+run_rc_command "$1"

@@ -1,6 +1,13 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"log/slog"
+	"os"
+	"runtime/debug"
+	"time"
+
 	"github.com/Edouard127/lambda-api/api"
 	"github.com/Edouard127/lambda-api/api/middlewares"
 	"github.com/Edouard127/lambda-api/internal"
@@ -8,20 +15,16 @@ import (
 	fiblog "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 	flag "github.com/spf13/pflag"
-	"log/slog"
-	"net/http"
-	"os"
-	"runtime/debug"
-	"time"
 )
 
 var (
 	isOnline      = flag.Bool("online", true, "Online-mode authentication")
 	isDebug       = flag.Bool("debug", true, "Enable debug log output")
 	redisEndpoint = flag.String("redis", "", "Endpoint of the standalone redis instance")
+	keyPath       = flag.String("key", "", "Path to the private key")
 )
 
 func main() {
@@ -35,7 +38,21 @@ func main() {
 	}
 
 	printBuildInfo(logger)
-	go startPrometheus(logger)
+
+	var key *rsa.PrivateKey
+	var err error
+
+	f, err := os.ReadFile(*keyPath)
+	if err != nil {
+		key, _ = rsa.GenerateKey(rand.Reader, 2048)
+		logger.Warn("Failed to read the content of the private key", err)
+	}
+
+	key, err = jwt.ParseRSAPrivateKeyFromPEM(f)
+	if err != nil {
+		key, _ = rsa.GenerateKey(rand.Reader, 2048)
+		logger.Warn("Failed to read the content of the private key", err)
+	}
 
 	if !*isOnline {
 		logger.Warn("Warning, running in offline mode allows users to spoof their authentication and usurpate other players")
@@ -51,6 +68,7 @@ func main() {
 
 	internal.Set("logger", logger)
 	internal.Set("cache", rdb)
+	internal.Set("key", key)
 
 	if *isDebug {
 		router.Use(fiblog.New(fiblog.Config{
@@ -58,19 +76,12 @@ func main() {
 		}))
 		router.Use(pprof.New())
 	}
-	router.Use(middlewares.RequestDuration())
+
 	router.Use(recover.New(recover.Config{EnableStackTrace: *isDebug}))
 
 	api.New(router, rdb)
 
 	panic(router.Listen(":8080"))
-}
-
-func startPrometheus(logger *slog.Logger) {
-	logger.Info("Starting prometheus metrics server on :9100")
-
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":9100", nil)
 }
 
 func printBuildInfo(logger *slog.Logger) {

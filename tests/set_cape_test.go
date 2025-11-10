@@ -2,8 +2,14 @@ package tests
 
 import (
 	"crypto/hmac"
+	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/json"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
@@ -12,10 +18,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestSetCape(t *testing.T) {
@@ -67,6 +69,8 @@ func TestSetCape(t *testing.T) {
 	app := fiber.New()
 	internal.Set("logger", slog.Default())
 	internal.Set("cache", db)
+	internal.Set("key", &rsa.PrivateKey{})
+	
 	app.Get("/", jwtware.New(jwtware.Config{
 		SuccessHandler: func(ctx *fiber.Ctx) error {
 			token := ctx.Locals("user").(*jwt.Token)

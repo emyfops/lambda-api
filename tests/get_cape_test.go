@@ -2,7 +2,14 @@ package tests
 
 import (
 	"bytes"
+	"crypto/rsa"
 	"encoding/json"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"sync"
+	"testing"
+
 	"github.com/Edouard127/lambda-api/api/models"
 	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
@@ -10,11 +17,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
-	"net/http"
-	"net/http/httptest"
-	"sync"
-	"testing"
 )
 
 func Test(t *testing.T) {
@@ -78,6 +80,7 @@ func TestGetCape(t *testing.T) {
 	app := fiber.New()
 	internal.Set("logger", slog.Default())
 	internal.Set("cache", db)
+	internal.Set("key", &rsa.PrivateKey{})
 	app.Get("/", routes.GetCape)
 
 	for _, tc := range testCases {
