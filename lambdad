@@ -30,7 +30,7 @@ start_precmd="lambdad_precmd"
 start_cmd="lambdad_start"
 
 extra_commands="keygen"
-keygen_cmd="openssl genpkey -algorithm RSA -out ${lambdad_key} -nodes -pkeyopt rsa_keygen_bits:2048"
+keygen_cmd="openssl genpkey -algorithm RSA -out ${lambdad_key} -pkeyopt rsa_keygen_bits:2048"
 
 lambdad_precmd()
 {
