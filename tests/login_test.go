@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/Edouard127/lambda-api/api/models"
-	"github.com/Edouard127/lambda-api/api/routes"
 	"github.com/Edouard127/lambda-api/internal"
 	"github.com/gofiber/fiber/v2"
 	flag "github.com/spf13/pflag"
@@ -54,7 +53,6 @@ func TestLogin(t *testing.T) {
 	app := fiber.New()
 	internal.Set("logger", slog.Default())
 	internal.Set("key", &rsa.PrivateKey{})
-	app.Get("/", routes.Login)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
