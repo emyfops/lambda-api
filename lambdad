@@ -15,7 +15,7 @@ load_rc_config $name
 
 : ${lambdad_enable:=NO}
 : ${lambdad_command="/usr/local/bin/${name}"}
-: ${lambdad_directory="/usr/local/etc/lambdad"}
+: ${lambdad_directory="/usr/local/etc/lambda-api"}
 : ${lambdad_key="${lambdad_directory}/key.pem"}
 : ${lambdad_flags="--online=true --debug=true --redis=localhost:999 --key=${lambdad_key}"}
 : ${lambdad_logdir="/var/log/${name}"}
