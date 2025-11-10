@@ -48,12 +48,12 @@ func main() {
 	if err != nil {
 		key, _ = rsa.GenerateKey(rand.Reader, 2048)
 		logger.Warn("Failed to read the content of the private key", err)
-	}
-
-	key, err = jwt.ParseRSAPrivateKeyFromPEM(f)
-	if err != nil {
-		key, _ = rsa.GenerateKey(rand.Reader, 2048)
-		logger.Warn("Failed to read the content of the private key", err)
+	} else {
+		key, err = jwt.ParseRSAPrivateKeyFromPEM(f)
+		if err != nil {
+			key, _ = rsa.GenerateKey(rand.Reader, 2048)
+			logger.Warn("Failed to read the content of the private key", err)
+		}
 	}
 
 	if !*isOnline {
